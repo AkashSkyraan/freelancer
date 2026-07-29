@@ -1,0 +1,15 @@
+LoginRequest:
+
+  type: object
+
+  required:
+
+    - phone
+
+  properties:
+
+    phone:
+
+      type: string
+
+      example: "9876543210"
