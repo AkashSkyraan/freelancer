@@ -1,8 +1,29 @@
-import swaggerUI from "swagger-ui-express";
-import YAML from "yamljs";
+import swaggerJsdoc from "swagger-jsdoc";
+import swaggerUi from "swagger-ui-express";
+import dotenv from "dotenv";
 
-const swaggerDocument = YAML.load("./src/docs/openapi.bundle.yaml");
+dotenv.config();
 
-export default (app) => {
-  app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(swaggerDocument));
+const options = {
+  definition: {
+    openapi: "3.0.3",
+    info: {
+      title: "Freelancer API",
+      version: "1.0.0",
+      description: "Backend API Documentation",
+    },
+    servers: [
+      {
+        url: process.env.BASE_URL,
+      },
+    ],
+  },
+
+  apis: ["./src/swagger/*.js"],
 };
+
+export default function setupSwagger(app) {
+  const swaggerSpec = swaggerJsdoc(options);
+
+  app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+}

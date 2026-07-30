@@ -1,8 +1,8 @@
 import express from "express";
 import dotenv from "dotenv";
 import router from "./routes/index.js";
-// import swaggerUi from "swagger-ui-express";
 import setupSwagger from "./config/swagger.js";
+
 dotenv.config();
 
 const app = express();
@@ -10,7 +10,6 @@ const app = express();
 app.use(express.json());
 app.use("/api", router);
 
-// app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 setupSwagger(app);
 
 app.get("/", (req, res) => {
