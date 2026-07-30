@@ -12,10 +12,13 @@
  *             properties:
  *               status:
  *                 type: integer
+ *                 example: 200
+ *               success:
+ *                 type: integer
  *                 example: 1
  *               message:
  *                 type: string
- *                 example: Success
+ *                 example: successfull response
  *               data:
  *                 type: array
  *                 items:
@@ -72,6 +75,9 @@
  *             type: object
  *             properties:
  *               status:
+ *                 type: integer
+ *                 example: 500
+ *               success:
  *                 type: integer
  *                 example: 0
  *               message:
