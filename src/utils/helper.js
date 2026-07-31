@@ -3,6 +3,9 @@ import crypto from "crypto";
 import { pool } from "../config/db.js";
 import dotenv from "dotenv";
 dotenv.config();
+import { customAlphabet } from "nanoid";
+
+const nanoidCustom = customAlphabet("ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890", 12);
 
 export const sendResponse = async (
   res,
@@ -22,18 +25,25 @@ export const sendResponse = async (
 };
 
 export const generateOtp = (length = 6) => {
-  const min = 10 ** (length - 1);
-  const max = 10 ** length;
-  let otp = crypto.randomInt(min, max).toString();
-  if (process.env.NODE_ENV === "development") {
-    otp = "123456";
+  try {
+    const min = 10 ** (length - 1);
+    const max = 10 ** length;
+    let otp;
+    if (process.env.NODE_ENV === "development") {
+      otp = "123456";
+    } else {
+      otp = crypto.randomInt(min, max).toString();
+    }
+    return otp;
+  } catch (error) {
+    throw error;
   }
-  return otp;
 };
 
-export const executeQuery = async (query, params = []) => {
+export const executeQuery = async (query, params = [], connection = null) => {
   try {
-    const [rows] = await pool.execute(query, params);
+    const executor = connection || pool;
+    const [rows] = await executor.execute(query, params);
     return {
       success: 1,
       data: rows,
@@ -46,7 +56,7 @@ export const executeQuery = async (query, params = []) => {
   }
 };
 
-export const getServerError = (res, error) => {
+export const getServerError = async (res, error) => {
   return sendResponse(
     res,
     500,
@@ -57,4 +67,8 @@ export const getServerError = (res, error) => {
       ? error.message
       : "Internal server error",
   );
+};
+
+export const generateUserId = () => {
+  return `USER_${nanoidCustom()}`;
 };

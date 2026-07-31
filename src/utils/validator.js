@@ -41,3 +41,56 @@ export const verifyOtpSchema = Joi.object({
 
   otp: Joi.string().required().length(6),
 });
+export const signUpSchema = Joi.object({
+  email: Joi.string().email().required().min(16),
+
+  password: Joi.string().required().min(6),
+
+  role: Joi.string().required().valid("CLIENT", "FREELANCER").messages({
+    "any.only": "Invalid role.",
+    "any.required": "Role is required.",
+  }),
+});
+export const loginSchema = Joi.object({
+  email: Joi.string().email().required().min(16),
+
+  password: Joi.string().required().min(6),
+
+  role: Joi.string().required().valid("CLIENT", "FREELANCER").messages({
+    "any.only": "Invalid role.",
+    "any.required": "Role is required.",
+  }),
+});
+export const createCProfileSchema = Joi.object({
+  user_id: Joi.string().required(),
+
+  name: Joi.string().required(),
+
+  profile: Joi.string().required().allow(""),
+
+  com_name: Joi.string().required(),
+
+  com_type: Joi.string().required().allow(""),
+
+  com_size: Joi.string().required().allow(""),
+
+  com_site: Joi.string().required().allow(""),
+
+  email: Joi.string().required(),
+
+  phn_num: Joi.string().required(),
+
+  c_code: Joi.string().required(),
+
+  zip_code: Joi.string().required(),
+
+  address: Joi.string().required(),
+
+  city: Joi.string().required(),
+
+  state: Joi.string().required(),
+
+  country: Joi.string().required(),
+
+  about: Joi.string().required(),
+});

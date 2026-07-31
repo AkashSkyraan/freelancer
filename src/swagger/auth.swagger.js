@@ -17,7 +17,7 @@
  *             properties:
  *               email:
  *                 type: string
- *                 example: test@gmail.com
+ *                 example: test12@gmail.com
  *               phn_num:
  *                 type: string
  *                 example: "9876543210"
@@ -56,7 +56,7 @@
  *             properties:
  *               email:
  *                 type: string
- *                 example: test@gmail.com
+ *                 example: test12@gmail.com
  *               phn_num:
  *                 type: string
  *                 example: "9876543210"
@@ -75,4 +75,75 @@
  *         $ref: '#/components/responses/InternalServerError'
  */
 // #endregion
+
+// #region SignUp User
+/**
+ * @swagger
+ * /api/auth/signup:
+ *   post:
+ *     tags:
+ *       - Auth
+ *     summary: User Signup
+ *     description: Signup using email and password.
+ *
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 example: test12@gmail.com
+ *               password:
+ *                 type: string
+ *                 example: "password@123"
+ *               role:
+ *                 type: string
+ *                 example: "CLIENT"
+ *     responses:
+ *       200:
+ *         $ref: '#/components/responses/SuccessResponse'
+ *
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
+// #endregion
+
+// #region Login User
+/**
+ * @swagger
+ * /api/auth/login:
+ *   post:
+ *     tags:
+ *       - Auth
+ *     summary: User login
+ *     description: login using email and password.
+ *
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 example: test12@gmail.com
+ *               password:
+ *                 type: string
+ *                 example: "password@123"
+ *               role:
+ *                 type: string
+ *                 example: "CLIENT"
+ *     responses:
+ *       200:
+ *         $ref: '#/components/responses/SuccessResponse'
+ *
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
+// #endregion
+
 export {};

@@ -1,13 +1,24 @@
 import express from "express";
-import { validateRequest, verifyOtpSchema } from "../utils/validator.js";
+import {
+  loginSchema,
+  signUpSchema,
+  validateRequest,
+  verifyOtpSchema,
+} from "../utils/validator.js";
 import { requestOtpSchema } from "../utils/validator.js";
-import { generateOtp, getServerError, sendResponse } from "../utils/helper.js";
+import {
+  generateOtp,
+  generateUserId,
+  getServerError,
+  sendResponse,
+} from "../utils/helper.js";
 import { authModel } from "../model/auth.model.js";
-import { error } from "console";
-
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import { pool } from "../config/db.js";
 const authMdl = new authModel();
 
-export const requestotp = async (req, res) => {
+export const requestOtp = async (req, res) => {
   try {
     const validatedData = validateRequest(requestOtpSchema, req.body, res);
     const { email, phn_num, c_code, type } = validatedData;
@@ -47,7 +58,7 @@ export const requestotp = async (req, res) => {
         ? new Date(Date.now() + 2 * 60 * 1000)
         : new Date(Date.now() + 5 * 60 * 1000);
 
-    const result = await authMdl.requestotp({
+    const result = await authMdl.requestOtp({
       email,
       phn_num,
       c_code,
@@ -65,7 +76,7 @@ export const requestotp = async (req, res) => {
   }
 };
 
-export const verifyotp = async (req, res) => {
+export const verifyOtp = async (req, res) => {
   try {
     const validatedData = validateRequest(verifyOtpSchema, req.body, res);
     const { email, phn_num, c_code, otp } = validatedData;
@@ -81,7 +92,7 @@ export const verifyotp = async (req, res) => {
       );
     }
 
-    const result = await authMdl.fetchotp({ email, phn_num, c_code });
+    const result = await authMdl.fetchOtp({ email, phn_num, c_code });
 
     const data = result?.data[0];
 
@@ -95,12 +106,114 @@ export const verifyotp = async (req, res) => {
       return sendResponse(res, 200, 0, "otp has been expired", [], "");
     }
 
-    await authMdl.verifyotp(data?.id);
+    await authMdl.verifyOtp(data?.id);
 
     if (result?.success === 1) {
       return sendResponse(res, 200, 1, "otp verified successfully", [otp], "");
     } else if (result?.success === 0) {
       return sendResponse(res, 200, 0, "failed to verify otp", [], "");
+    }
+  } catch (error) {
+    return getServerError(res, error);
+  }
+};
+
+export const signUp = async (req, res) => {
+  let connection;
+  try {
+    const { email, password, role } = req.body;
+
+    const allowed_roles = ["CLIENT", "FREELANCER"];
+
+    if (!allowed_roles.includes(role)) {
+      return sendResponse(res, 200, 0, "Invalid role", [], "");
+    }
+
+    const check_email_verified = await authMdl.fetchOtp({ email });
+
+    const verification_result = check_email_verified?.data[0]?.is_verified;
+    if (verification_result !== 1) {
+      return sendResponse(
+        res,
+        200,
+        0,
+        "please do signup process again",
+        [],
+        "",
+      );
+    }
+
+    const salt = 10;
+    const hashed_pwd = await bcrypt.hash(password, salt);
+
+    const user_id = await generateUserId();
+
+    const token = jwt.sign(
+      { email, role, user_id },
+      process.env.JWT_SECRET_KEY,
+    );
+
+    connection = await pool.getConnection();
+    await connection.beginTransaction();
+    const result = await authMdl.signUp(
+      { user_id, email, hashed_pwd },
+      connection,
+    );
+    const register_role = await authMdl.registerRole(
+      { user_id, role },
+      connection,
+    );
+
+    if (result?.success === 1 && register_role?.success === 1) {
+      await connection.commit();
+      return sendResponse(res, 200, 1, "signup successfully done", [token], "");
+    } else if (result?.success === 0 || register_role?.success === 0) {
+      return sendResponse(res, 200, 0, "signup failed", [], "");
+    }
+  } catch (error) {
+    if (connection) {
+      await connection.rollback();
+    }
+    return getServerError(res, error);
+  } finally {
+    connection.release();
+  }
+};
+
+export const login = async (req, res) => {
+  try {
+    const validatedData = validateRequest(loginSchema, req.body, res);
+
+    const { email, password, role } = validatedData;
+
+    const login_check_result = await authMdl.loginCheck({ email });
+
+    if (login_check_result?.data.length < 1) {
+      return sendResponse(res, 200, 0, "signup Required", [], "");
+    }
+
+    const login_check = login_check_result?.data[0];
+    const { user_role, user_id } = login_check;
+
+    if (role !== user_role) {
+      return sendResponse(res, 200, 0, "Invalid role", [], "");
+    }
+
+    let is_match = false;
+    if (email === login_check?.email) {
+      is_match = await bcrypt.compare(password, login_check?.password);
+    }
+
+    let token;
+
+    if (is_match) {
+      token = jwt.sign(
+        { email, user_id, user_role },
+        process.env.JWT_SECRET_KEY,
+      );
+      return sendResponse(res, 200, 1, "login successfull", [token], "");
+    } else {
+      return sendResponse(res, 200, 0, "Invalid credentials", [], "");
     }
   } catch (error) {
     return getServerError(res, error);
