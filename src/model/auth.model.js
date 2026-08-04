@@ -204,4 +204,51 @@ export class authModel {
       };
     }
   }
+
+  async is_email_num_verified({ email, phn_num, c_code }) {
+    let query;
+    let params;
+
+    if (email) {
+      query = `SELECT id, email, otp, is_used, is_verified, expired_at FROM otp WHERE email = ? AND is_used = ? AND expired_at > NOW() ORDER BY created_at DESC LIMIT 1`;
+      params = [email, 1];
+    } else if (phn_num) {
+      query = `SELECT id, phn_num, c_code, otp, is_used, is_verified, expired_at FROM otp WHERE phn_num = ? AND is_used = ? AND expired_at > NOW() ORDER BY created_at DESC LIMIT 1`;
+      params = [phn_num, 1];
+    }
+    const result = await executeQuery(query, params);
+
+    if (result?.success === 1) {
+      return {
+        success: 1,
+        data: result?.data,
+      };
+    } else if (result?.success === 0) {
+      return {
+        success: 0,
+        error: result?.error,
+      };
+    }
+  }
+
+  async is_user_id_valid({ email, user_id }) {
+    let query;
+    let params;
+
+    query = `SELECT user_id, email FROM users WHERE email = ? AND user_id = ?`;
+    params = [email, user_id];
+    const result = await executeQuery(query, params);
+
+    if (result?.success === 1) {
+      return {
+        success: 1,
+        data: result?.data,
+      };
+    } else if (result?.success === 0) {
+      return {
+        success: 0,
+        error: result?.error,
+      };
+    }
+  }
 }

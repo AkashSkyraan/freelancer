@@ -168,6 +168,7 @@ export const signUp = async (req, res) => {
       await connection.commit();
       return sendResponse(res, 200, 1, "signup successfully done", [token], "");
     } else if (result?.success === 0 || register_role?.success === 0) {
+      await connection.rollback();
       return sendResponse(res, 200, 0, "signup failed", [], "");
     }
   } catch (error) {
@@ -176,7 +177,9 @@ export const signUp = async (req, res) => {
     }
     return getServerError(res, error);
   } finally {
-    connection.release();
+    if (connection) {
+      connection.release();
+    }
   }
 };
 
