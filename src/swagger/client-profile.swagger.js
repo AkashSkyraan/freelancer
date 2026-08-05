@@ -4,7 +4,7 @@
  * /api/client/createprofile:
  *   post:
  *     tags:
- *       - Client
+ *       - Client Profile
  *     summary: Create client profile
  *     description: create client profile with required fields.
  *
@@ -78,7 +78,7 @@
  * /api/client/deleteprofile:
  *   post:
  *     tags:
- *       - Client
+ *       - Client Profile
  *     summary: Delete client profile
  *     description: Delete client profile with id.
  *
@@ -107,7 +107,7 @@
  * /api/client/updateprofile:
  *   post:
  *     tags:
- *       - Client
+ *       - Client Profile
  *     summary: Update client profile
  *     description: Update client profile with required fields.
  *
@@ -181,7 +181,7 @@
  * /api/client/getprofile:
  *   post:
  *     tags:
- *       - Client
+ *       - Client Profile
  *     summary: Get client profile details
  *     description: Get client profile details by passing user_id.
  *

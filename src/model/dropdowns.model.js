@@ -6,7 +6,7 @@ export class dropdownModel {
     let query;
     let params;
 
-    query = `SELECT category, value FROM dropdown_master WHERE category = ? AND is_active = ?`;
+    query = `SELECT id, category, value FROM dropdown_master WHERE category = ? AND is_active = ?`;
     params = [category, 1];
 
     const result = await executeQuery(query, params);

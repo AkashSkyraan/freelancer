@@ -251,4 +251,25 @@ export class authModel {
       };
     }
   }
+
+  async is_user_exist({ user_id }) {
+    let query;
+    let params;
+
+    query = `SELECT user_id, email FROM users WHERE user_id = ?`;
+    params = [user_id];
+    const result = await executeQuery(query, params);
+
+    if (result?.success === 1) {
+      return {
+        success: 1,
+        data: result?.data,
+      };
+    } else if (result?.success === 0) {
+      return {
+        success: 0,
+        error: result?.error,
+      };
+    }
+  }
 }

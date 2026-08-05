@@ -23,6 +23,7 @@ export const validateRequest = (schema, data, res) => {
   return value;
 };
 
+// AUTHENTICATION
 export const requestOtpSchema = Joi.object({
   email: Joi.string().email().required().allow("").min(16),
 
@@ -62,6 +63,7 @@ export const loginSchema = Joi.object({
   }),
 });
 
+//DROPDOWN MASTER SCHEMA'S
 export const getDropdownSchema = Joi.object({
   category: Joi.string().required(),
 });
@@ -78,6 +80,7 @@ export const updateDropdownSchema = Joi.object({
   value: Joi.string().required(),
 });
 
+// CREATE CLIENT PROFILE SCHEMAS
 export const createCProfileSchema = Joi.object({
   user_id: Joi.string().required(),
 
@@ -93,7 +96,7 @@ export const createCProfileSchema = Joi.object({
 
   com_site: Joi.string().required().allow(""),
 
-  email: Joi.string().required(),
+  email: Joi.string().required().email(),
 
   phn_num: Joi.string().required(),
 
@@ -126,7 +129,7 @@ export const updateCProfileSchema = Joi.object({
 
   com_site: Joi.string().required().allow(""),
 
-  email: Joi.string().required().allow(""),
+  email: Joi.string().required().allow("").email(),
 
   phn_num: Joi.string().required().allow(""),
 
@@ -151,6 +154,7 @@ export const getClientProfileSchema = Joi.object({
   user_id: Joi.string().required(),
 });
 
+//CREATE PROJECT SCHEMAS
 export const createProjectSchema = Joi.object({
   user_id: Joi.string().required(),
   title: Joi.string().required().max(50),
@@ -182,4 +186,45 @@ export const updateProjectSchema = Joi.object({
   price: Joi.string().required(),
   price_type: Joi.string().required(),
   open_position: Joi.number().required(),
+});
+
+// CATEGORIES AND SUB CATEGORIES
+export const addCategorySchema = Joi.object({
+  name: Joi.string().required(),
+  icon: Joi.string().required().allow(""),
+  parent_id: Joi.number().required(),
+});
+export const getCategorySchema = Joi.object({
+  parent_id: Joi.number().required(),
+});
+export const updateCategorySchema = Joi.object({
+  id: Joi.number().required(),
+  name: Joi.string().required(),
+  icon: Joi.string().required().allow(""),
+  parent_id: Joi.number().required(),
+});
+
+//CREATE FREELANCER PROFILE WITH MULTIPLE STEPS
+export const createFreelancerProfileSchema = Joi.object({
+  user_id: Joi.string().required(),
+  name: Joi.string().required(),
+  profile_pic: Joi.string().required(),
+  email: Joi.string().required().email(),
+  phn_num: Joi.string().required(),
+  c_code: Joi.string().required(),
+  zip_code: Joi.string().required(),
+  address: Joi.string().required(),
+  city: Joi.string().required(),
+  state: Joi.string().required(),
+  country: Joi.string().required(),
+  about: Joi.string().required().max(500),
+  languages: Joi.array()
+    .min(1)
+    .items(
+      Joi.object({
+        language_id: Joi.number().integer().required(),
+        proficiency_id: Joi.number().integer().required(),
+      }),
+    )
+    .required(),
 });

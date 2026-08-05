@@ -12,7 +12,7 @@ import {
   updateCProfileSchema,
   validateRequest,
 } from "../utils/validator.js";
-import { clientModel } from "../model/client.model.js";
+import { clientModel } from "../model/client-profile.model.js";
 import { authModel } from "../model/auth.model.js";
 import { pool } from "../config/db.js";
 
@@ -42,7 +42,7 @@ export const createClientProfile = async (req, res) => {
       about,
     } = validatedData;
 
-    const is_user_exist = await clientMdl.is_user_exist({ user_id });
+    const is_user_exist = await authMdl.is_user_exist({ user_id });
     if (is_user_exist?.data.length < 1) {
       return sendResponse(res, 200, 0, "No user found", [], "");
     }
