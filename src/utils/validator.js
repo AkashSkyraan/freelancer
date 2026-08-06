@@ -228,3 +228,64 @@ export const createFreelancerProfileSchema = Joi.object({
     )
     .required(),
 });
+export const createFreelancerPositionSchema = Joi.object({
+  user_id: Joi.string().required(),
+  position_id: Joi.number().required(),
+  experience_id: Joi.number().required(),
+});
+export const createFreelancerServiceSchema = Joi.object({
+  user_id: Joi.string().required(),
+  service_id: Joi.array().items(Joi.number()).min(1).required(),
+});
+export const createFreelancerSkillSchema = Joi.object({
+  user_id: Joi.string().required(),
+  skill_id: Joi.array().items(Joi.number()).min(1).required(),
+});
+
+export const createFreelancerEducationSchema = Joi.object({
+  user_id: Joi.string().required(),
+  course: Joi.string().required(),
+  start_month: Joi.number().required(),
+  start_year: Joi.number().required(),
+  end_month: Joi.number().required(),
+  end_year: Joi.number().required(),
+});
+export const updateFreelancerEducationSchema = Joi.object({
+  user_id: Joi.string().required(),
+  id: Joi.number().required(),
+  course: Joi.string().required(),
+  start_month: Joi.number().required(),
+  start_year: Joi.number().required(),
+  end_month: Joi.number().required(),
+  end_year: Joi.number().required(),
+});
+export const deleteFreelancerEducationSchema = Joi.object({
+  user_id: Joi.string().required(),
+  id: Joi.number().required(),
+});
+
+export const createFreelancerWorkexpSchema = Joi.object({
+  user_id: Joi.string().required(),
+  job_role: Joi.string().required(),
+  start_month: Joi.number().required(),
+  start_year: Joi.number().required(),
+  end_month: Joi.number().required(),
+  end_year: Joi.number().required(),
+});
+export const updateFreelancerWorkexpSchema = Joi.object({
+  user_id: Joi.string().required(),
+  id: Joi.number().required(),
+  job_role: Joi.string().required(),
+  start_month: Joi.number().required(),
+  start_year: Joi.number().required(),
+  end_month: Joi.number().required(),
+  end_year: Joi.number().required(),
+});
+export const deleteFreelancerWorkexpSchema = Joi.object({
+  user_id: Joi.string().required(),
+  id: Joi.number().required(),
+});
+
+export const getFreelancerProfileSchema = Joi.object({
+  user_id: Joi.string().required(),
+});

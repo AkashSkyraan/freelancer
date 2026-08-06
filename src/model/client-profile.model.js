@@ -94,8 +94,6 @@ export class clientModel {
     sql_query = `UPDATE client_profile SET ${query.join(", ")} WHERE id = ?`;
     sql_params = params;
 
-    console.log(sql_query, sql_params);
-
     const result = await executeQuery(sql_query, sql_params);
 
     if (result?.success === 1) {
