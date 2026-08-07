@@ -82,8 +82,6 @@ export const updateDropdownSchema = Joi.object({
 
 // CREATE CLIENT PROFILE SCHEMAS
 export const createCProfileSchema = Joi.object({
-  user_id: Joi.string().required(),
-
   name: Joi.string().required(),
 
   profile: Joi.string().required().allow(""),
@@ -150,13 +148,9 @@ export const updateCProfileSchema = Joi.object({
 export const deleteClientProfileSchema = Joi.object({
   id: Joi.number().required(),
 });
-export const getClientProfileSchema = Joi.object({
-  user_id: Joi.string().required(),
-});
 
 //CREATE PROJECT SCHEMAS
 export const createProjectSchema = Joi.object({
-  user_id: Joi.string().required(),
   title: Joi.string().required().max(50),
   description: Joi.string().required().max(500),
   skills: Joi.string().required(),
@@ -183,7 +177,7 @@ export const updateProjectSchema = Joi.object({
   duration: Joi.number().required(),
   duration_type: Joi.string().required(),
   experience: Joi.number().required(),
-  price: Joi.string().required(),
+  price: Joi.number().integer().required(),
   price_type: Joi.string().required(),
   open_position: Joi.number().required(),
 });
@@ -206,7 +200,6 @@ export const updateCategorySchema = Joi.object({
 
 //CREATE FREELANCER PROFILE WITH MULTIPLE STEPS
 export const createFreelancerProfileSchema = Joi.object({
-  user_id: Joi.string().required(),
   name: Joi.string().required(),
   profile_pic: Joi.string().required(),
   email: Joi.string().required().email(),
@@ -229,21 +222,20 @@ export const createFreelancerProfileSchema = Joi.object({
     .required(),
 });
 export const createFreelancerPositionSchema = Joi.object({
-  user_id: Joi.string().required(),
   position_id: Joi.number().required(),
   experience_id: Joi.number().required(),
 });
 export const createFreelancerServiceSchema = Joi.object({
-  user_id: Joi.string().required(),
   service_id: Joi.array().items(Joi.number()).min(1).required(),
 });
 export const createFreelancerSkillSchema = Joi.object({
-  user_id: Joi.string().required(),
   skill_id: Joi.array().items(Joi.number()).min(1).required(),
 });
+export const updateFreelancerProfileSchema = Joi.object({
+  
+})
 
 export const createFreelancerEducationSchema = Joi.object({
-  user_id: Joi.string().required(),
   course: Joi.string().required(),
   start_month: Joi.number().required(),
   start_year: Joi.number().required(),
@@ -251,7 +243,6 @@ export const createFreelancerEducationSchema = Joi.object({
   end_year: Joi.number().required(),
 });
 export const updateFreelancerEducationSchema = Joi.object({
-  user_id: Joi.string().required(),
   id: Joi.number().required(),
   course: Joi.string().required(),
   start_month: Joi.number().required(),
@@ -260,12 +251,10 @@ export const updateFreelancerEducationSchema = Joi.object({
   end_year: Joi.number().required(),
 });
 export const deleteFreelancerEducationSchema = Joi.object({
-  user_id: Joi.string().required(),
   id: Joi.number().required(),
 });
 
 export const createFreelancerWorkexpSchema = Joi.object({
-  user_id: Joi.string().required(),
   job_role: Joi.string().required(),
   start_month: Joi.number().required(),
   start_year: Joi.number().required(),
@@ -273,7 +262,6 @@ export const createFreelancerWorkexpSchema = Joi.object({
   end_year: Joi.number().required(),
 });
 export const updateFreelancerWorkexpSchema = Joi.object({
-  user_id: Joi.string().required(),
   id: Joi.number().required(),
   job_role: Joi.string().required(),
   start_month: Joi.number().required(),
@@ -282,10 +270,5 @@ export const updateFreelancerWorkexpSchema = Joi.object({
   end_year: Joi.number().required(),
 });
 export const deleteFreelancerWorkexpSchema = Joi.object({
-  user_id: Joi.string().required(),
   id: Joi.number().required(),
-});
-
-export const getFreelancerProfileSchema = Joi.object({
-  user_id: Joi.string().required(),
 });

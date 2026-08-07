@@ -6,15 +6,16 @@ import dropdownroutes from "./dropdowns.routes.js";
 import projectroutes from "./project.routes.js";
 import categoryroutes from "./category.routes.js";
 import freelancerroutes from "./freelancer-profile.routes.js";
+import { verifyToken } from "../middleware/verifyToken.middleware.js";
 
 const router = express.Router();
 
 router.use("/auth", authroutes);
-router.use("/client", clientroutes);
-router.use("/media", mediaroutes);
+router.use("/client", verifyToken, clientroutes);
+router.use("/media", verifyToken, mediaroutes);
 router.use("/dropdowns", dropdownroutes);
-router.use("/project", projectroutes);
+router.use("/project", verifyToken, projectroutes);
 router.use("/category", categoryroutes);
-router.use("/freelancer", freelancerroutes);
+router.use("/freelancer", verifyToken, freelancerroutes);
 
 export default router;

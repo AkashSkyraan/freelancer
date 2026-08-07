@@ -12,6 +12,20 @@ const options = {
       version: "1.0.0",
       description: "Backend API Documentation",
     },
+    security: [
+      {
+        bearerAuth: [],
+      },
+    ],
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: "http",
+          scheme: "bearer",
+          bearerFormat: "JWT",
+        },
+      },
+    },
     servers: [
       {
         url: process.env.BASE_URL,

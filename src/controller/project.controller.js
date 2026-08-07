@@ -18,9 +18,8 @@ const projectMdl = new projectModel();
 export const createProject = async (req, res) => {
   try {
     const validatedData = validateRequest(createProjectSchema, req.body, res);
-
+    const user_id = req.user.user_id;
     const {
-      user_id,
       title,
       description,
       skills,
@@ -60,8 +59,9 @@ export const deleteProject = async (req, res) => {
   try {
     const validatedData = validateRequest(deleteProjectSchema, req.body, res);
     const { id } = validatedData;
+    const user_id = req.user.user_id;
 
-    const result = await projectMdl.deleteSoloProject({ id });
+    const result = await projectMdl.deleteSoloProject({ id, user_id });
 
     if (result?.success === 1) {
       return sendResponse(res, 200, 1, "project deleted successfully", [], "");
@@ -113,7 +113,7 @@ export const getSoloProject = async (req, res) => {
 export const updateProject = async (req, res) => {
   try {
     const validatedData = validateRequest(updateProjectSchema, req.body, res);
-
+    const user_id = req.user.user_id;
     const {
       id,
       title,
@@ -130,6 +130,7 @@ export const updateProject = async (req, res) => {
 
     const result = await projectMdl.updateProject({
       id,
+      user_id,
       title,
       description,
       skills,
@@ -147,13 +148,6 @@ export const updateProject = async (req, res) => {
     } else if (result?.success === 0) {
       return sendResponse(res, 200, 0, "Failed to update project", [], "");
     }
-  } catch (error) {
-    return getServerError(res, error);
-  }
-};
-
-export const searchProjects = async (req, res) => {
-  try {
   } catch (error) {
     return getServerError(res, error);
   }

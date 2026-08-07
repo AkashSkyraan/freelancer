@@ -1,5 +1,9 @@
 import express from "express";
-import { getServerError, sendResponse } from "../utils/helper.js";
+import {
+  getServerError,
+  replaceNullWithEmptyString,
+  sendResponse,
+} from "../utils/helper.js";
 import {
   createFreelancerEducationSchema,
   createFreelancerPositionSchema,
@@ -9,7 +13,6 @@ import {
   createFreelancerWorkexpSchema,
   deleteFreelancerEducationSchema,
   deleteFreelancerWorkexpSchema,
-  getFreelancerProfileSchema,
   updateFreelancerEducationSchema,
   updateFreelancerWorkexpSchema,
   validateRequest,
@@ -29,8 +32,8 @@ export const createFreelancerProfile = async (req, res) => {
       req.body,
       res,
     );
+    const user_id = req.user.user_id;
     const {
-      user_id,
       name,
       profile_pic,
       email,
@@ -45,10 +48,10 @@ export const createFreelancerProfile = async (req, res) => {
       languages,
     } = validatedData;
 
-    const user_check = await authMdl.is_user_exist({ user_id });
-    if (user_check?.data.length < 1) {
-      return sendResponse(res, 200, 0, "Invalid user", [], "");
-    }
+    // const user_check = await authMdl.is_user_exist({ user_id });
+    // if (user_check?.data.length < 1) {
+    //   return sendResponse(res, 200, 0, "Invalid user", [], "");
+    // }
 
     const [email_verify, number_verify] = await Promise.all([
       authMdl.is_email_num_verified({ email }),
@@ -163,7 +166,8 @@ export const createFreelancerPosition = async (req, res) => {
       req.body,
       res,
     );
-    const { user_id, position_id, experience_id } = validatedData;
+    const user_id = req.user.user_id;
+    const { position_id, experience_id } = validatedData;
 
     const form_check = await freelancerMdl.is_step_1_exist({ user_id });
     if (form_check?.success === 0) {
@@ -264,7 +268,8 @@ export const createFreelancerServices = async (req, res) => {
       req.body,
       res,
     );
-    const { user_id, service_id } = validatedData;
+    const user_id = req.user.user_id;
+    const { service_id } = validatedData;
 
     const form_check = await freelancerMdl.is_step_1_exist({ user_id });
     if (form_check?.success === 0) {
@@ -377,7 +382,8 @@ export const createFreelancerSkills = async (req, res) => {
       req.body,
       res,
     );
-    const { user_id, skill_id } = validatedData;
+    const user_id = req.user.user_id;
+    const { skill_id } = validatedData;
 
     const form_check = await freelancerMdl.is_step_1_exist({ user_id });
     if (form_check?.success === 0) {
@@ -481,22 +487,23 @@ export const createFreelancerEducation = async (req, res) => {
       req.body,
       res,
     );
-    const { user_id, course, start_month, start_year, end_month, end_year } =
+    const user_id = req.user.user_id;
+    const { course, start_month, start_year, end_month, end_year } =
       validatedData;
 
-    const is_user_exist = await authMdl.is_user_exist({ user_id });
-    if (is_user_exist?.success === 0) {
-      return sendResponse(
-        res,
-        200,
-        0,
-        "failed to create freelancer education",
-        [],
-        "",
-      );
-    } else if (is_user_exist?.data.length === 0) {
-      return sendResponse(res, 200, 0, "No freelancer found", [], "");
-    }
+    // const is_user_exist = await authMdl.is_user_exist({ user_id });
+    // if (is_user_exist?.success === 0) {
+    //   return sendResponse(
+    //     res,
+    //     200,
+    //     0,
+    //     "failed to create freelancer education",
+    //     [],
+    //     "",
+    //   );
+    // } else if (is_user_exist?.data.length === 0) {
+    //   return sendResponse(res, 200, 0, "No freelancer found", [], "");
+    // }
 
     const freelancer_id_result = await freelancerMdl.fetchFreelancerId({
       user_id,
@@ -547,29 +554,23 @@ export const updateFreelancerEducation = async (req, res) => {
       req.body,
       res,
     );
-    const {
-      user_id,
-      id,
-      course,
-      start_month,
-      start_year,
-      end_month,
-      end_year,
-    } = validatedData;
+    const user_id = req.user.user_id;
+    const { id, course, start_month, start_year, end_month, end_year } =
+      validatedData;
 
-    const is_user_exist = await authMdl.is_user_exist({ user_id });
-    if (is_user_exist?.success === 0) {
-      return sendResponse(
-        res,
-        200,
-        0,
-        "failed to update freelancer education",
-        [],
-        "",
-      );
-    } else if (is_user_exist?.data.length === 0) {
-      return sendResponse(res, 200, 0, "No freelancer found", [], "");
-    }
+    // const is_user_exist = await authMdl.is_user_exist({ user_id });
+    // if (is_user_exist?.success === 0) {
+    //   return sendResponse(
+    //     res,
+    //     200,
+    //     0,
+    //     "failed to update freelancer education",
+    //     [],
+    //     "",
+    //   );
+    // } else if (is_user_exist?.data.length === 0) {
+    //   return sendResponse(res, 200, 0, "No freelancer found", [], "");
+    // }
 
     const freelancer_id_result = await freelancerMdl.fetchFreelancerId({
       user_id,
@@ -621,21 +622,22 @@ export const deleteFreelancerEducation = async (req, res) => {
       req.body,
       res,
     );
-    const { user_id, id } = validatedData;
+    const user_id = req.user.user_id;
+    const { id } = validatedData;
 
-    const is_user_exist = await authMdl.is_user_exist({ user_id });
-    if (is_user_exist?.success === 0) {
-      return sendResponse(
-        res,
-        200,
-        0,
-        "failed to delete freelancer education",
-        [],
-        "",
-      );
-    } else if (is_user_exist?.data.length === 0) {
-      return sendResponse(res, 200, 0, "No freelancer found", [], "");
-    }
+    // const is_user_exist = await authMdl.is_user_exist({ user_id });
+    // if (is_user_exist?.success === 0) {
+    //   return sendResponse(
+    //     res,
+    //     200,
+    //     0,
+    //     "failed to delete freelancer education",
+    //     [],
+    //     "",
+    //   );
+    // } else if (is_user_exist?.data.length === 0) {
+    //   return sendResponse(res, 200, 0, "No freelancer found", [], "");
+    // }
 
     const freelancer_id_result = await freelancerMdl.fetchFreelancerId({
       user_id,
@@ -683,22 +685,23 @@ export const createFreelancerWorkexp = async (req, res) => {
       req.body,
       res,
     );
-    const { user_id, job_role, start_month, start_year, end_month, end_year } =
+    const user_id = req.user.user_id;
+    const { job_role, start_month, start_year, end_month, end_year } =
       validatedData;
 
-    const is_user_exist = await authMdl.is_user_exist({ user_id });
-    if (is_user_exist?.success === 0) {
-      return sendResponse(
-        res,
-        200,
-        0,
-        "failed to create freelancer work experience",
-        [],
-        "",
-      );
-    } else if (is_user_exist?.data.length === 0) {
-      return sendResponse(res, 200, 0, "No freelancer found", [], "");
-    }
+    // const is_user_exist = await authMdl.is_user_exist({ user_id });
+    // if (is_user_exist?.success === 0) {
+    //   return sendResponse(
+    //     res,
+    //     200,
+    //     0,
+    //     "failed to create freelancer work experience",
+    //     [],
+    //     "",
+    //   );
+    // } else if (is_user_exist?.data.length === 0) {
+    //   return sendResponse(res, 200, 0, "No freelancer found", [], "");
+    // }
 
     const freelancer_id_result = await freelancerMdl.fetchFreelancerId({
       user_id,
@@ -763,29 +766,23 @@ export const updateFreelancerWorkexp = async (req, res) => {
       req.body,
       res,
     );
-    const {
-      user_id,
-      id,
-      job_role,
-      start_month,
-      start_year,
-      end_month,
-      end_year,
-    } = validatedData;
+    const user_id = req.user.user_id;
+    const { id, job_role, start_month, start_year, end_month, end_year } =
+      validatedData;
 
-    const is_user_exist = await authMdl.is_user_exist({ user_id });
-    if (is_user_exist?.success === 0) {
-      return sendResponse(
-        res,
-        200,
-        0,
-        "failed to update freelancer work experience",
-        [],
-        "",
-      );
-    } else if (is_user_exist?.data.length === 0) {
-      return sendResponse(res, 200, 0, "No freelancer found", [], "");
-    }
+    // const is_user_exist = await authMdl.is_user_exist({ user_id });
+    // if (is_user_exist?.success === 0) {
+    //   return sendResponse(
+    //     res,
+    //     200,
+    //     0,
+    //     "failed to update freelancer work experience",
+    //     [],
+    //     "",
+    //   );
+    // } else if (is_user_exist?.data.length === 0) {
+    //   return sendResponse(res, 200, 0, "No freelancer found", [], "");
+    // }
 
     const freelancer_id_result = await freelancerMdl.fetchFreelancerId({
       user_id,
@@ -851,21 +848,22 @@ export const deleteFreelancerWorkexp = async (req, res) => {
       req.body,
       res,
     );
-    const { user_id, id } = validatedData;
+    const user_id = req.user.user_id;
+    const { id } = validatedData;
 
-    const is_user_exist = await authMdl.is_user_exist({ user_id });
-    if (is_user_exist?.success === 0) {
-      return sendResponse(
-        res,
-        200,
-        0,
-        "failed to delete freelancer work experience",
-        [],
-        "",
-      );
-    } else if (is_user_exist?.data.length === 0) {
-      return sendResponse(res, 200, 0, "No freelancer found", [], "");
-    }
+    // const is_user_exist = await authMdl.is_user_exist({ user_id });
+    // if (is_user_exist?.success === 0) {
+    //   return sendResponse(
+    //     res,
+    //     200,
+    //     0,
+    //     "failed to delete freelancer work experience",
+    //     [],
+    //     "",
+    //   );
+    // } else if (is_user_exist?.data.length === 0) {
+    //   return sendResponse(res, 200, 0, "No freelancer found", [], "");
+    // }
 
     const freelancer_id_result = await freelancerMdl.fetchFreelancerId({
       user_id,
@@ -922,26 +920,21 @@ export const deleteFreelancerWorkexp = async (req, res) => {
 // GET FREELANCER PROFILE DETAILS
 export const getFreelancerProfile = async (req, res) => {
   try {
-    const validatedData = validateRequest(
-      getFreelancerProfileSchema,
-      req.body,
-      res,
-    );
-    const { user_id } = validatedData;
+    const user_id = req.user.user_id;
 
-    const is_user_exist = await authMdl.is_user_exist({ user_id });
-    if (is_user_exist?.success === 0) {
-      return sendResponse(
-        res,
-        200,
-        0,
-        "failed to fetch freelancer profile",
-        [],
-        "",
-      );
-    } else if (is_user_exist?.data.length === 0) {
-      return sendResponse(res, 200, 0, "No freelancer found", [], "");
-    }
+    // const is_user_exist = await authMdl.is_user_exist({ user_id });
+    // if (is_user_exist?.success === 0) {
+    //   return sendResponse(
+    //     res,
+    //     200,
+    //     0,
+    //     "failed to fetch freelancer profile",
+    //     [],
+    //     "",
+    //   );
+    // } else if (is_user_exist?.data.length === 0) {
+    //   return sendResponse(res, 200, 0, "No freelancer found", [], "");
+    // }
 
     const freelancer_id_result = await freelancerMdl.fetchFreelancerId({
       user_id,
@@ -966,7 +959,7 @@ export const getFreelancerProfile = async (req, res) => {
       );
     }
     const freelancer_id = freelancer_id_result?.data[0]?.id;
-    console.log(freelancer_id);
+    // console.log(freelancer_id);
 
     const [
       profile,
@@ -986,13 +979,25 @@ export const getFreelancerProfile = async (req, res) => {
       freelancerMdl.getWork_exps({ freelancer_id }),
     ]);
 
-    const profile_data = profile?.data;
-    const languages_data = languages?.data;
-    const educations_data = educations?.data;
-    const positions_data = positions?.data;
-    const services_data = services?.data;
-    const skills_data = skills?.data;
-    const work_exps_data = work_exps?.data;
+    const profile_data = await profile?.data;
+    const languages_data = await languages?.data;
+    const educations_data = await educations?.data;
+    const positions_data = await positions?.data;
+    const services_data = await services?.data;
+    const skills_data = await skills?.data;
+    const work_exps_data = await work_exps?.data;
+
+    const data = {
+      profile: profile_data,
+      languages: languages_data,
+      educations: educations_data,
+      positions: positions_data,
+      services: services_data,
+      skills: skills_data,
+      work_exps: work_exps_data,
+    };
+
+    const final_response = replaceNullWithEmptyString(data);
 
     if (
       profile?.success === 0 ||
@@ -1007,33 +1012,25 @@ export const getFreelancerProfile = async (req, res) => {
         res,
         200,
         0,
-        "Failed to fetch freelancer profile",
-        [
-          profile_data,
-          languages_data,
-          educations_data,
-          positions_data,
-          services_data,
-          skills_data,
-          work_exps_data,
-        ],
+        "Failed to fetch freelancer profiless",
+        [],
         "",
       );
     } else if (
-      profile?.success === 0 &&
-      languages?.success === 0 &&
-      educations?.success === 0 &&
-      positions?.success === 0 &&
-      services?.success === 0 &&
-      skills?.success === 0 &&
-      work_exps?.success === 0
+      profile?.success === 1 &&
+      languages?.success === 1 &&
+      educations?.success === 1 &&
+      positions?.success === 1 &&
+      services?.success === 1 &&
+      skills?.success === 1 &&
+      work_exps?.success === 1
     ) {
       return sendResponse(
         res,
         200,
         1,
         "Freelancer profile fetched successfully",
-        [],
+        [final_response],
         "",
       );
     }

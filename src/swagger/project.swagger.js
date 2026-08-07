@@ -15,9 +15,6 @@
  *           schema:
  *             type: object
  *             properties:
- *               user_id:
- *                 type: string
- *                 example: USER_JNTOYP5UA8J7MQV
  *               title:
  *                 type: string
  *                 example: "new project"
@@ -115,7 +112,7 @@
  */
 // #endregion
 
-// #region Create and post project
+// #region Update project
 /**
  * @swagger
  * /api/project/updateproject:
@@ -157,8 +154,8 @@
  *                 type: number
  *                 example: 1
  *               price:
- *                 type: string
- *                 example: "10000"
+ *                 type: number
+ *                 example: 10000
  *               price_type:
  *                 type: string
  *                 example: "fixed"

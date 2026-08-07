@@ -51,7 +51,7 @@ export class projectModel {
     let query;
     let params;
 
-    query = `SELECT title, descp, skills, talent_role, duration, duration_type, experience, price, price_type, open_position, project_status FROM projects WHERE id = ?`;
+    query = `SELECT id, title, descp, skills, talent_role, duration, duration_type, experience, price, price_type, open_position, project_status FROM projects WHERE id = ?`;
     params = [id];
 
     const result = await executeQuery(query, params);
@@ -67,12 +67,12 @@ export class projectModel {
       };
     }
   }
-  async deleteSoloProject({ id }) {
+  async deleteSoloProject({ id, user_id }) {
     let query;
     let params;
 
-    query = `DELETE FROM projects WHERE id = ?`;
-    params = [id];
+    query = `DELETE FROM projects WHERE id = ? and user_id = ?`;
+    params = [id, user_id];
 
     const result = await executeQuery(query, params);
 
@@ -90,6 +90,7 @@ export class projectModel {
   }
   async updateProject({
     id,
+    user_id,
     title,
     description,
     skills,
@@ -104,7 +105,7 @@ export class projectModel {
     let query;
     let params;
 
-    query = `UPDATE projects SET title = ?, descp = ?, skills = ?, talent_role = ?, duration = ?, duration_type = ?, experience = ?, price = ?, price_type = ?, open_position = ? WHERE id = ?`;
+    query = `UPDATE projects SET title = ?, descp = ?, skills = ?, talent_role = ?, duration = ?, duration_type = ?, experience = ?, price = ?, price_type = ?, open_position = ? WHERE id = ? and user_id = ?`;
     params = [
       title,
       description,
@@ -117,8 +118,8 @@ export class projectModel {
       price_type,
       open_position,
       id,
+      user_id,
     ];
-
     const result = await executeQuery(query, params);
 
     if (result?.success === 1) {

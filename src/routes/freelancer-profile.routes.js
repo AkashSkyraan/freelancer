@@ -1,23 +1,65 @@
 import express from "express";
 import * as freelancercontroller from "../controller/freelancer-profile.controller.js";
+import { verifyToken } from "../middleware/verifyToken.middleware.js";
+import { verifyRole } from "../middleware/verifyRole.middleware.js";
 
 const router = express.Router();
 
 // FREELANCER ONBOARDING FORM
-router.post("/createprofile", freelancercontroller.createFreelancerProfile);
-router.post("/createposition", freelancercontroller.createFreelancerPosition);
-router.post("/createservice", freelancercontroller.createFreelancerServices);
-router.post("/createskill", freelancercontroller.createFreelancerSkills);
+router.post(
+  "/createprofile",
+  verifyRole(["FREELANCER"]),
+  freelancercontroller.createFreelancerProfile,
+);
+router.post(
+  "/createposition",
+  verifyRole(["FREELANCER"]),
+  freelancercontroller.createFreelancerPosition,
+);
+router.post(
+  "/createservice",
+  verifyRole(["FREELANCER"]),
+  freelancercontroller.createFreelancerServices,
+);
+router.post(
+  "/createskill",
+  verifyRole(["FREELANCER"]),
+  freelancercontroller.createFreelancerSkills,
+);
 
 // FREELANCER EDUCATION
-router.post("/createeducation", freelancercontroller.createFreelancerEducation);
-router.post("/updateeducation", freelancercontroller.updateFreelancerEducation);
-router.post("/deleteeducation", freelancercontroller.deleteFreelancerEducation);
+router.post(
+  "/createeducation",
+  verifyRole(["FREELANCER"]),
+  freelancercontroller.createFreelancerEducation,
+);
+router.post(
+  "/updateeducation",
+  verifyRole(["FREELANCER"]),
+  freelancercontroller.updateFreelancerEducation,
+);
+router.post(
+  "/deleteeducation",
+  verifyRole(["FREELANCER"]),
+  freelancercontroller.deleteFreelancerEducation,
+);
 
 // FREELANCER WORK EXPERIENCE
-router.post("/creatework", freelancercontroller.createFreelancerWorkexp);
-router.post("/updatework", freelancercontroller.updateFreelancerWorkexp);
-router.post("/deletework", freelancercontroller.deleteFreelancerWorkexp);
+router.post(
+  "/creatework",
+  verifyRole(["FREELANCER"]),
+  freelancercontroller.createFreelancerWorkexp,
+);
+router.post(
+  "/updatework",
+  verifyRole(["FREELANCER"]),
+  freelancercontroller.updateFreelancerWorkexp,
+);
+router.post(
+  "/deletework",
+  verifyRole(["FREELANCER"]),
+  freelancercontroller.deleteFreelancerWorkexp,
+);
 
 // FREELANCER PROFILE UPDATE
 router.post("/updateprofile", freelancercontroller.updateFreelancerProfile);

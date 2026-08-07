@@ -167,7 +167,7 @@ export class authModel {
     let query;
     let params;
 
-    query = `SELECT ur.user_role FROM user_role ur JOIN users u ON ur.user_id = u.user_id WHERE email = ? `;
+    query = `SELECT ur.user_role FROM user_role ur JOIN users u ON ur.user_id = u.user_id WHERE u.email = ? `;
     params = [email];
     const result = await executeQuery(query, params);
 
@@ -188,7 +188,7 @@ export class authModel {
     let query;
     let params;
 
-    query = `SELECT u.user_id, u.email, u.password, ur.user_role FROM users u JOIN user_role ur ON u.user_id = ur.user_id WHERE email = ?`;
+    query = `SELECT u.user_id, u.email, u.password, ur.user_role FROM users u JOIN user_role ur ON u.user_id = ur.user_id WHERE u.email = ?`;
     params = [email];
     const result = await executeQuery(query, params);
 

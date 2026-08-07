@@ -16,9 +16,6 @@
  *           schema:
  *             type: object
  *             properties:
- *               user_id:
- *                 type: string
- *                 example: "USER_JNTOYP5UA8J7MQV"
  *               name:
  *                 type: string
  *                 example: "akash"
@@ -94,9 +91,6 @@
  *           schema:
  *             type: object
  *             properties:
- *               user_id:
- *                 type: string
- *                 example: "USER_JNTOYP5UA8J7MQV"
  *               position_id:
  *                 type: number
  *                 example: 1
@@ -129,9 +123,6 @@
  *           schema:
  *             type: object
  *             properties:
- *               user_id:
- *                 type: string
- *                 example: "USER_JNTOYP5UA8J7MQV"
  *               service_id:
  *                 type: array
  *                 items:
@@ -163,9 +154,6 @@
  *           schema:
  *             type: object
  *             properties:
- *               user_id:
- *                 type: string
- *                 example: "USER_JNTOYP5UA8J7MQV"
  *               skill_id:
  *                 type: array
  *                 items:
@@ -232,9 +220,6 @@
  *           schema:
  *             type: object
  *             properties:
- *               user_id:
- *                 type: string
- *                 example: "USER_JNTOYP5UA8J7MQV"
  *               course:
  *                 type: string
  *                 example: "Computer science"
@@ -276,9 +261,6 @@
  *           schema:
  *             type: object
  *             properties:
- *               user_id:
- *                 type: string
- *                 example: "USER_JNTOYP5UA8J7MQV"
  *               id:
  *                 type: number
  *                 example: 1
@@ -323,9 +305,6 @@
  *           schema:
  *             type: object
  *             properties:
- *               user_id:
- *                 type: string
- *                 example: "USER_JNTOYP5UA8J7MQV"
  *               id:
  *                 type: number
  *                 example: 1
@@ -356,9 +335,6 @@
  *           schema:
  *             type: object
  *             properties:
- *               user_id:
- *                 type: string
- *                 example: "USER_JNTOYP5UA8J7MQV"
  *               job_role:
  *                 type: string
  *                 example: "Computer science"
@@ -400,9 +376,6 @@
  *           schema:
  *             type: object
  *             properties:
- *               user_id:
- *                 type: string
- *                 example: "USER_JNTOYP5UA8J7MQV"
  *               id:
  *                 type: number
  *                 example: 2
@@ -447,9 +420,6 @@
  *           schema:
  *             type: object
  *             properties:
- *               user_id:
- *                 type: string
- *                 example: "USER_JNTOYP5UA8J7MQV"
  *               id:
  *                 type: number
  *                 example: 2
@@ -473,16 +443,6 @@
  *     summary: Get freelancer profile
  *     description: get freelancer profile.
  *
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               user_id:
- *                 type: string
- *                 example: "USER_JNTOYP5UA8J7MQV"
  *     responses:
  *       200:
  *         $ref: '#/components/responses/SuccessResponse'

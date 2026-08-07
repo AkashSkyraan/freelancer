@@ -15,9 +15,6 @@
  *           schema:
  *             type: object
  *             properties:
- *               user_id:
- *                 type: string
- *                 example: "USER_JNTOYP5UA8J7MQV"
  *               name:
  *                 type: string
  *                 example: sky
@@ -184,17 +181,7 @@
  *       - Client Profile
  *     summary: Get client profile details
  *     description: Get client profile details by passing user_id.
- *
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               user_id:
- *                 type: string
- *                 example: "USER_JNTOYP5UA8J7MQV"
+ * 
  *     responses:
  *       200:
  *         $ref: '#/components/responses/SuccessResponse'

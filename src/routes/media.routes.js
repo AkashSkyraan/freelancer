@@ -4,6 +4,7 @@ import * as mediacontroller from "../controller/media.controller.js";
 import imageUpload from "../middleware/imageUpload.middleware.js";
 import videoUpload from "../middleware/videoUpload.middleware.js";
 import docUpload from "../middleware/docUpload.middleware.js";
+import { verifyToken } from "../middleware/verifyToken.middleware.js";
 
 const router = express.Router();
 

@@ -66,12 +66,12 @@ export class clientModel {
       };
     }
   }
-  async deleteClientProfile({ id }) {
+  async deleteClientProfile({ id, user_id }) {
     let query;
     let params;
 
-    query = `DELETE FROM client_profile WHERE id = ?`;
-    params = [id];
+    query = `DELETE FROM client_profile WHERE id = ? and user_id = ?`;
+    params = [id, user_id];
 
     const result = await executeQuery(query, params);
 
@@ -91,7 +91,7 @@ export class clientModel {
     let sql_query;
     let sql_params;
 
-    sql_query = `UPDATE client_profile SET ${query.join(", ")} WHERE id = ?`;
+    sql_query = `UPDATE client_profile SET ${query.join(", ")} WHERE id = ? AND user_id = ?`;
     sql_params = params;
 
     const result = await executeQuery(sql_query, sql_params);
@@ -112,7 +112,7 @@ export class clientModel {
     let query;
     let params;
 
-    query = `SELECT name, profile_pic, company_name, company_type, company_size, company_site, email, phn_num, c_code, zip_code, address, city, state, country, is_email_verified, is_number_verified, about FROM client_profile WHERE user_id = ?`;
+    query = `SELECT id, name, profile_pic, company_name, company_type, company_size, company_site, email, phn_num, c_code, zip_code, address, city, state, country, is_email_verified, is_number_verified, about FROM client_profile WHERE user_id = ?`;
     params = [user_id];
 
     const result = await executeQuery(query, params);

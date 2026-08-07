@@ -8,7 +8,6 @@ import {
   createCProfileSchema,
   createProjectSchema,
   deleteClientProfileSchema,
-  getClientProfileSchema,
   updateCProfileSchema,
   validateRequest,
 } from "../utils/validator.js";
@@ -23,8 +22,8 @@ export const createClientProfile = async (req, res) => {
   let connection;
   try {
     const validatedData = validateRequest(createCProfileSchema, req.body, res);
+    const user_id = req.user.user_id;
     const {
-      user_id,
       name,
       profile,
       com_name,
@@ -42,10 +41,10 @@ export const createClientProfile = async (req, res) => {
       about,
     } = validatedData;
 
-    const is_user_exist = await authMdl.is_user_exist({ user_id });
-    if (is_user_exist?.data.length < 1) {
-      return sendResponse(res, 200, 0, "No user found", [], "");
-    }
+    // const is_user_exist = await authMdl.is_user_exist({ user_id });
+    // if (is_user_exist?.data.length < 1) {
+    //   return sendResponse(res, 200, 0, "No user found", [], "");
+    // }
 
     const [email_verify, number_verify, is_exist] = await Promise.all([
       authMdl.is_email_num_verified({ email }),
@@ -159,6 +158,7 @@ export const createClientProfile = async (req, res) => {
 
 export const deleteClientProfile = async (req, res) => {
   try {
+    const user_id = req.user.user_id;
     const validatedData = validateRequest(
       deleteClientProfileSchema,
       req.body,
@@ -167,7 +167,7 @@ export const deleteClientProfile = async (req, res) => {
 
     const { id } = validatedData;
 
-    const result = await clientMdl.deleteClientProfile({ id });
+    const result = await clientMdl.deleteClientProfile({ id, user_id });
 
     if (result?.success === 1) {
       return sendResponse(
@@ -196,7 +196,7 @@ export const deleteClientProfile = async (req, res) => {
 export const updateClientProfile = async (req, res) => {
   try {
     const validatedData = validateRequest(updateCProfileSchema, req.body, res);
-
+    const user_id = req.user.user_id;
     const {
       id,
       name,
@@ -305,7 +305,7 @@ export const updateClientProfile = async (req, res) => {
       params.push(about);
     }
 
-    params.push(id);
+    params.push(id, user_id);
 
     const result = await clientMdl.updateClientProfile({ query, params });
 
@@ -335,13 +335,7 @@ export const updateClientProfile = async (req, res) => {
 
 export const getClientProfile = async (req, res) => {
   try {
-    const validatedData = validateRequest(
-      getClientProfileSchema,
-      req.body,
-      res,
-    );
-
-    const { user_id } = validatedData;
+    const user_id = req.user.user_id;
 
     const result = await clientMdl.getClientProfile({ user_id });
 

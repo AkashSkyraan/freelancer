@@ -387,6 +387,153 @@ export class freelancerModel {
   }
 
   //FREELANCER GET PROFILE
+  async getProfile({ freelancer_id }) {
+    let query;
+    let params;
+
+    query = `SELECT id, name, profile_pic, email, phn_num, c_code, zip_code, address, city, state, country, about FROM freelancer_profile WHERE id = ?`;
+    params = [freelancer_id];
+
+    const result = await executeQuery(query, params);
+
+    if (result?.success === 1) {
+      return {
+        success: 1,
+        data: result?.data,
+      };
+    } else if (result?.success === 0) {
+      return {
+        success: 0,
+        error: result?.error,
+      };
+    }
+  }
+  async getLanguages({ freelancer_id }) {
+    let query;
+    let params;
+
+    query = `SELECT id, language_id, proficiency_id FROM freelancer_languages WHERE freelancer_profile_id = ?`;
+    params = [freelancer_id];
+
+    const result = await executeQuery(query, params);
+
+    if (result?.success === 1) {
+      return {
+        success: 1,
+        data: result?.data,
+      };
+    } else if (result?.success === 0) {
+      return {
+        success: 0,
+        error: result?.error,
+      };
+    }
+  }
+  async getEducations({ freelancer_id }) {
+    let query;
+    let params;
+
+    query = `SELECT id, course, start_month, start_year, end_month, end_year FROM freelancer_education WHERE freelancer_profile_id = ?`;
+    params = [freelancer_id];
+
+    const result = await executeQuery(query, params);
+
+    if (result?.success === 1) {
+      return {
+        success: 1,
+        data: result?.data,
+      };
+    } else if (result?.success === 0) {
+      return {
+        success: 0,
+        error: result?.error,
+      };
+    }
+  }
+  async getPositions({ freelancer_id }) {
+    let query;
+    let params;
+
+    query = `SELECT id, position_id, experience_id FROM freelancer_positions WHERE freelancer_profile_id = ?`;
+    params = [freelancer_id];
+
+    const result = await executeQuery(query, params);
+
+    if (result?.success === 1) {
+      return {
+        success: 1,
+        data: result?.data,
+      };
+    } else if (result?.success === 0) {
+      return {
+        success: 0,
+        error: result?.error,
+      };
+    }
+  }
+  async getServices({ freelancer_id }) {
+    let query;
+    let params;
+
+    query = `SELECT id, service_id FROM freelancer_service_categories WHERE freelancer_profile_id = ?`;
+    params = [freelancer_id];
+
+    const result = await executeQuery(query, params);
+
+    if (result?.success === 1) {
+      return {
+        success: 1,
+        data: result?.data,
+      };
+    } else if (result?.success === 0) {
+      return {
+        success: 0,
+        error: result?.error,
+      };
+    }
+  }
+  async getSkills({ freelancer_id }) {
+    let query;
+    let params;
+
+    query = `SELECT id, skill_id FROM freelancer_skills WHERE freelancer_profile_id = ?`;
+    params = [freelancer_id];
+
+    const result = await executeQuery(query, params);
+
+    if (result?.success === 1) {
+      return {
+        success: 1,
+        data: result?.data,
+      };
+    } else if (result?.success === 0) {
+      return {
+        success: 0,
+        error: result?.error,
+      };
+    }
+  }
+  async getWork_exps({ freelancer_id }) {
+    let query;
+    let params;
+
+    query = `SELECT id, job_role, start_month, start_year, end_month, end_year FROM freelancer_work_exp WHERE freelancer_profile_id = ?`;
+    params = [freelancer_id];
+
+    const result = await executeQuery(query, params);
+
+    if (result?.success === 1) {
+      return {
+        success: 1,
+        data: result?.data,
+      };
+    } else if (result?.success === 0) {
+      return {
+        success: 0,
+        error: result?.error,
+      };
+    }
+  }
 
   //SUPPORT QUERIES
   async fetchFreelancerId({ user_id }) {
