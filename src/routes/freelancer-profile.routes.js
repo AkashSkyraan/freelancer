@@ -1,6 +1,5 @@
 import express from "express";
 import * as freelancercontroller from "../controller/freelancer-profile.controller.js";
-import { verifyToken } from "../middleware/verifyToken.middleware.js";
 import { verifyRole } from "../middleware/verifyRole.middleware.js";
 
 const router = express.Router();
@@ -61,10 +60,56 @@ router.post(
   freelancercontroller.deleteFreelancerWorkexp,
 );
 
-// FREELANCER PROFILE UPDATE
-router.post("/updateprofile", freelancercontroller.updateFreelancerProfile);
-
 // GET FREELANCER PROFILE
 router.post("/getprofile", freelancercontroller.getFreelancerProfile);
+
+// FREELANCER PROFILE UPDATE
+router.post(
+  "/updateprofile",
+  verifyRole(["FREELANCER"]),
+  freelancercontroller.updateFreelancerProfile,
+);
+router.post(
+  "/updateposition",
+  verifyRole(["FREELANCER"]),
+  freelancercontroller.updateFreelancerPosition,
+);
+router.post(
+  "/updateskill",
+  verifyRole(["FREELANCER"]),
+  freelancercontroller.updateFreelacnerSkills,
+);
+router.post(
+  "/updatelang",
+  verifyRole(["FREELANCER"]),
+  freelancercontroller.updateFreelancerLanguages,
+);
+router.post(
+  "/addlang",
+  verifyRole(["FREELANCER"]),
+  freelancercontroller.addFreelancerLanguages,
+);
+
+// SETTINGS PAGE API
+router.post(
+  "/updateaddress",
+  verifyRole(["FREELANCER"]),
+  freelancercontroller.updateFreelancerAddress,
+);
+router.post(
+  "/preference",
+  verifyRole(["FREELANCER"]),
+  freelancercontroller.updateFreelancerPreferences,
+);
+router.post(
+  "/updatepwd",
+  verifyRole(["FREELANCER"]),
+  freelancercontroller.updateFreelancerPassword,
+);
+router.post(
+  "/updatecredential",
+  verifyRole(["FREELANCER"]),
+  freelancercontroller.updateFreelancerCredential,
+);
 
 export default router;

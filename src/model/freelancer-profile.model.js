@@ -535,6 +535,194 @@ export class freelancerModel {
     }
   }
 
+  // UPDATE FREELANCER PROFILE
+  async updateFreelancerProfile({ query, params }) {
+    let Query;
+
+    Query = `UPDATE freelancer_profile SET ${query.join(", ")} WHERE id = ?`;
+
+    const result = await executeQuery(Query, params);
+
+    if (result?.success === 1) {
+      return {
+        success: 1,
+        data: result?.data,
+      };
+    } else if (result?.success === 0) {
+      return {
+        success: 0,
+        error: result?.error,
+      };
+    }
+  }
+  async updateFreelancerPosition({
+    id,
+    freelancer_id,
+    position_id,
+    experience_id,
+  }) {
+    let query;
+    let params;
+
+    query = `UPDATE freelancer_positions SET position_id = ?, experience_id = ? WHERE id = ? AND freelancer_profile_id = ?`;
+    params = [position_id, experience_id, id, freelancer_id];
+
+    const result = await executeQuery(query, params);
+
+    if (result?.success === 1) {
+      return {
+        success: 1,
+        data: result?.data,
+      };
+    } else if (result?.success === 0) {
+      return {
+        success: 0,
+        error: result?.error,
+      };
+    }
+  }
+  async updateFreelancerLanguages(
+    { id, language_id, proficiency_id, freelancer_id },
+    connection = null,
+  ) {
+    let query;
+    let params;
+
+    query = `UPDATE freelancer_languages SET language_id = ?, proficiency_id = ? WHERE id = ? AND freelancer_profile_id = ?`;
+    params = [language_id, proficiency_id, id, freelancer_id];
+
+    const result = await executeQuery(query, params, connection);
+
+    if (result?.success === 1) {
+      return {
+        success: 1,
+        data: result?.data,
+      };
+    } else if (result?.success === 0) {
+      return {
+        success: 0,
+        error: result?.error,
+      };
+    }
+  }
+  async updateFreelancerAddress({
+    zip_code,
+    address,
+    city,
+    state,
+    country,
+    freelancer_id,
+  }) {
+    let query;
+    let params;
+
+    query = `UPDATE freelancer_profile SET zip_code = ?, address = ?, city = ?, state = ?, country = ? WHERE id = ?`;
+    params = [zip_code, address, city, state, country, freelancer_id];
+
+    const result = await executeQuery(query, params);
+
+    if (result?.success === 1) {
+      return {
+        success: 1,
+        data: result?.data,
+      };
+    } else if (result?.success === 0) {
+      return {
+        success: 0,
+        error: result?.error,
+      };
+    }
+  }
+  async updateFreelancerPreference({ column_name, params }) {
+    let query;
+
+    query = `UPDATE freelancer_profile SET ${column_name.join(", ")} WHERE id = ?`;
+
+    const result = await executeQuery(query, params);
+
+    if (result?.success === 1) {
+      return {
+        success: 1,
+        data: result?.data,
+      };
+    } else if (result?.success === 0) {
+      return {
+        success: 0,
+        error: result?.error,
+      };
+    }
+  }
+
+  // UPDATE PROFILE PASSWORD
+  async updateFreelancerPassword({ user_id, password }) {
+    let query;
+    let params;
+
+    query = `UPDATE users SET password = ? WHERE user_id = ?`;
+    params = [password, user_id];
+
+    const result = await executeQuery(query, params);
+
+    if (result?.success === 1) {
+      return {
+        success: 1,
+        data: result?.data,
+      };
+    } else if (result?.success === 0) {
+      return {
+        success: 0,
+        error: result?.error,
+      };
+    }
+  }
+
+  // UPDATE FREELANCER CREDENTIALS
+  async updateFreelancerEmail({ user_id, email }, connection = null) {
+    let query;
+    let params;
+
+    query = `UPDATE freelancer_profile SET email = ? WHERE user_id = ?`;
+    params = [email, user_id];
+
+    const result = await executeQuery(query, params, connection);
+
+    if (result?.success === 1) {
+      return {
+        success: 1,
+        data: result?.data,
+      };
+    } else if (result?.success === 0) {
+      return {
+        success: 0,
+        error: result?.error,
+      };
+    }
+  }
+  async updateFreelancerPhn_num(
+    { phn_num, c_code, user_id },
+    connection = null,
+  ) {
+    let query;
+    let params;
+
+    query = `UPDATE freelancer_profile SET phn_num = ?, c_code = ? WHERE user_id = ?`;
+    params = [phn_num, c_code, user_id];
+
+    const result = await executeQuery(query, params, connection);
+
+    if (result?.success === 1) {
+      return {
+        success: 1,
+        data: result?.data,
+      };
+    } else if (result?.success === 0) {
+      return {
+        success: 0,
+        error: result?.error,
+      };
+    }
+  }
+
   //SUPPORT QUERIES
   async fetchFreelancerId({ user_id }) {
     let query;
@@ -542,6 +730,69 @@ export class freelancerModel {
 
     query = `SELECT id FROM freelancer_profile WHERE user_id = ?`;
     params = [user_id];
+
+    const result = await executeQuery(query, params);
+
+    if (result?.success === 1) {
+      return {
+        success: 1,
+        data: result?.data,
+      };
+    } else if (result?.success === 0) {
+      return {
+        success: 0,
+        error: result?.error,
+      };
+    }
+  }
+  async fetchFreelancerSkillIds({ freelancer_id }) {
+    let query;
+    let params;
+
+    query = `SELECT id FROM freelancer_skills WHERE freelancer_profile_id = ?`;
+    params = [freelancer_id];
+
+    const result = await executeQuery(query, params);
+
+    if (result?.success === 1) {
+      return {
+        success: 1,
+        data: result?.data,
+      };
+    } else if (result?.success === 0) {
+      return {
+        success: 0,
+        error: result?.error,
+      };
+    }
+  }
+  async deleteFreelancerSkills({ id, freelancer_id }, connection = null) {
+    let query;
+    let params;
+
+    query = `DELETE FROM freelancer_skills WHERE id = ? AND freelancer_profile_id = ?`;
+    params = [id, freelancer_id];
+
+    const result = await executeQuery(query, params, connection);
+
+    if (result?.success === 1) {
+      return {
+        success: 1,
+        data: result?.data,
+      };
+    } else if (result?.success === 0) {
+      return {
+        success: 0,
+        error: result?.error,
+      };
+    }
+  }
+  async addFreelancerSkills({ language_id, proficiency_id, freelancer_id }) {
+    let query;
+    let params;
+
+    query = `INSERT INTO freelancer_languages (language_id, proficiency_id, freelancer_profile_id) VALUES (?, ?, ?)`;
+    params = [language_id, proficiency_id, freelancer_id];
 
     const result = await executeQuery(query, params);
 

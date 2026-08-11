@@ -168,40 +168,6 @@
  */
 // #endregion
 
-// #region Update Freelancer Profile
-/**
- * @swagger
- * /api/freelancer/updateprofile:
- *   post:
- *     tags:
- *       - Freelancer Profile
- *     summary: Update freelancer profile
- *     description: Update freelancer profile.
- *
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               user_id:
- *                 type: string
- *                 example: "USER_JNTOYP5UA8J7MQV"
- *               skill_id:
- *                 type: array
- *                 items:
- *                    type: number
- *                    example: 2, 13, 24, 2, 3, 10
- *     responses:
- *       200:
- *         $ref: '#/components/responses/SuccessResponse'
- *
- *       500:
- *         $ref: '#/components/responses/InternalServerError'
- */
-// #endregion
-
 //EDUCATION
 // #region Create Freelancer Profile education
 /**
@@ -433,7 +399,7 @@
 // #endregion
 
 //GET FREELANCER PROFILE DETAILS
-// #region Delete Freelancer Profile education
+// #region Get Freelancer Profile Details
 /**
  * @swagger
  * /api/freelancer/getprofile:
@@ -443,6 +409,332 @@
  *     summary: Get freelancer profile
  *     description: get freelancer profile.
  *
+ *     responses:
+ *       200:
+ *         $ref: '#/components/responses/SuccessResponse'
+ *
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
+// #endregion
+
+// UPDATE FREELACER PROFILE
+// #region Update Freelancer Profile
+/**
+ * @swagger
+ * /api/freelancer/updateprofile:
+ *   post:
+ *     tags:
+ *       - Freelancer Profile
+ *     summary: Update freelancer profile
+ *     description: Update freelancer profile.
+ *
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 example: "skyraan person"
+ *               profile_pic:
+ *                 type: string
+ *                 example: "www.skyraan_person_pic"
+ *               about:
+ *                 type: string
+ *                 example: "about skyraan person"
+ *     responses:
+ *       200:
+ *         $ref: '#/components/responses/SuccessResponse'
+ *
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
+// #endregion
+
+// #region Update Freelancer Position
+/**
+ * @swagger
+ * /api/freelancer/updateposition:
+ *   post:
+ *     tags:
+ *       - Freelancer Profile
+ *     summary: Update freelancer position
+ *     description: Update freelancer position.
+ *
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               id:
+ *                 type: number
+ *                 example: 2
+ *               position_id:
+ *                 type: number
+ *                 example: 2
+ *               experience_id:
+ *                 type: number
+ *                 example: 2
+ *     responses:
+ *       200:
+ *         $ref: '#/components/responses/SuccessResponse'
+ *
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
+// #endregion
+
+// #region Update Freelancer skills
+/**
+ * @swagger
+ * /api/freelancer/updateskill:
+ *   post:
+ *     tags:
+ *       - Freelancer Profile
+ *     summary: Update freelancer skill
+ *     description: Update freelancer skill.
+ *
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               skill_id:
+ *                 type: array
+ *                 items:
+ *                    type: number
+ *                    example: 2, 13, 24, 2, 3, 10
+ *     responses:
+ *       200:
+ *         $ref: '#/components/responses/SuccessResponse'
+ *
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
+// #endregion
+
+// #region Update Freelancer Languages
+/**
+ * @swagger
+ * /api/freelancer/updatelang:
+ *   post:
+ *     tags:
+ *       - Freelancer Profile
+ *     summary: Update freelancer languages
+ *     description: Update freelancer languages.
+ *
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               languages:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: integer
+ *                       example: 2
+ *                     language_id:
+ *                       type: integer
+ *                       example: 2
+ *                     proficiency_id:
+ *                       type: integer
+ *                       example: 2
+ *                 example:
+ *                    - id: 7
+ *                      language_id: 1
+ *                      proficiency_id: 2
+ *                    - id: 8
+ *                      language_id: 2
+ *                      proficiency_id: 3
+ *     responses:
+ *       200:
+ *         $ref: '#/components/responses/SuccessResponse'
+ *
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
+// #endregion
+
+// #region Add Freelancer Languages
+/**
+ * @swagger
+ * /api/freelancer/addlang:
+ *   post:
+ *     tags:
+ *       - Freelancer Profile
+ *     summary: Add freelancer languages
+ *     description: Add freelancer languages.
+ *
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               languages:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     language_id:
+ *                       type: integer
+ *                       example: 2
+ *                     proficiency_id:
+ *                       type: integer
+ *                       example: 2
+ *                 example:
+ *                    - language_id: 1
+ *                      proficiency_id: 2
+ *     responses:
+ *       200:
+ *         $ref: '#/components/responses/SuccessResponse'
+ *
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
+// #endregion
+
+// #region Update Freelancer address
+/**
+ * @swagger
+ * /api/freelancer/updateaddress:
+ *   post:
+ *     tags:
+ *       - Freelancer Profile
+ *     summary: Update freelancer Address
+ *     description: Update freelancer Address.
+ *
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               address:
+ *                 type: string
+ *                 example: "fci road gannapathy"
+ *               zip_code:
+ *                 type: string
+ *                 example: "641006"
+ *               city:
+ *                 type: string
+ *                 example: "coimbatore"
+ *               state:
+ *                 type: string
+ *                 example: "Tamil Nadu"
+ *               country:
+ *                 type: string
+ *                 example: "India"
+ *     responses:
+ *       200:
+ *         $ref: '#/components/responses/SuccessResponse'
+ *
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
+// #endregion
+
+// #region Update Freelancer preference
+/**
+ * @swagger
+ * /api/freelancer/preference:
+ *   post:
+ *     tags:
+ *       - Freelancer Profile
+ *     summary: Update freelancer Preference
+ *     description: Update freelancer preference.
+ *
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               is_available:
+ *                 type: number
+ *                 example: 1
+ *               is_notification:
+ *                 type: number
+ *                 example: 1
+ *     responses:
+ *       200:
+ *         $ref: '#/components/responses/SuccessResponse'
+ *
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
+// #endregion
+
+// #region Update Freelancer Password
+/**
+ * @swagger
+ * /api/freelancer/updatepwd:
+ *   post:
+ *     tags:
+ *       - Freelancer Profile
+ *     summary: Update freelancer password
+ *     description: Update freelancer password.
+ *
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               password:
+ *                 type: string
+ *                 example: password@123
+ *     responses:
+ *       200:
+ *         $ref: '#/components/responses/SuccessResponse'
+ *
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
+// #endregion
+
+// #region Update Freelancer Credentials
+/**
+ * @swagger
+ * /api/freelancer/updatecredential:
+ *   post:
+ *     tags:
+ *       - Freelancer Profile
+ *     summary: Update freelancer Credentials
+ *     description: Update freelancer Credentials.
+ *
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 example: myskyraan@gmail.com
+ *               phn_num:
+ *                 type: string
+ *                 example: 9874562233
+ *               c_code:
+ *                 type: string
+ *                 example: +81
  *     responses:
  *       200:
  *         $ref: '#/components/responses/SuccessResponse'

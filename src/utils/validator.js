@@ -229,12 +229,75 @@ export const createFreelancerServiceSchema = Joi.object({
   service_id: Joi.array().items(Joi.number()).min(1).required(),
 });
 export const createFreelancerSkillSchema = Joi.object({
-  skill_id: Joi.array().items(Joi.number()).min(1).required(),
+  skill_id: Joi.array()
+    .items(
+      Joi.number().messages({
+        "number.base": "skill_id must be a number",
+      }),
+    )
+    .min(1)
+    .required(),
 });
-export const updateFreelancerProfileSchema = Joi.object({
-  
-})
 
+// FREELANCER PROFILE UPDATE
+export const updateFreelancerProfileSchema = Joi.object({
+  name: Joi.string().required().allow(""),
+  profile_pic: Joi.string().required().allow(""),
+  about: Joi.string().required().allow("").max(500),
+});
+export const updateFreelancerPositionSchema = Joi.object({
+  id: Joi.number().required(),
+  position_id: Joi.number().required(),
+  experience_id: Joi.number().required(),
+});
+export const updateFreelancerLanguagesSchema = Joi.object({
+  languages: Joi.array()
+    .min(1)
+    .items(
+      Joi.object({
+        id: Joi.number().integer().required(),
+        language_id: Joi.number().integer().required(),
+        proficiency_id: Joi.number().integer().required(),
+      }),
+    )
+    .required(),
+});
+export const updateFreelancerSkillsSchema = Joi.object({
+  skill_id: Joi.array()
+    .items(
+      Joi.number().messages({
+        "number.base": "skill_id must be a number",
+      }),
+    )
+    .min(1)
+    .required(),
+});
+export const addFreelancerLanguagesSchema = Joi.object({
+  languages: Joi.array()
+    .min(1)
+    .items(
+      Joi.object({
+        language_id: Joi.number().integer().required(),
+        proficiency_id: Joi.number().integer().required(),
+      }),
+    )
+    .required(),
+});
+export const updateFreelancerAddressSchema = Joi.object({
+  zip_code: Joi.string().required(),
+  address: Joi.string().required(),
+  city: Joi.string().required(),
+  state: Joi.string().required(),
+  country: Joi.string().required(),
+});
+export const updateFreelancerPreferenceSchema = Joi.object({
+  is_available: Joi.number().valid(0, 1),
+  is_notification: Joi.number().valid(0, 1),
+})
+  .min(1)
+  .max(1);
+
+// FREELANCER PROFILE EDUCATION
 export const createFreelancerEducationSchema = Joi.object({
   course: Joi.string().required(),
   start_month: Joi.number().required(),
@@ -254,6 +317,7 @@ export const deleteFreelancerEducationSchema = Joi.object({
   id: Joi.number().required(),
 });
 
+// FREELANCER PROFILE WORK EXPERIENCE
 export const createFreelancerWorkexpSchema = Joi.object({
   job_role: Joi.string().required(),
   start_month: Joi.number().required(),
@@ -271,4 +335,17 @@ export const updateFreelancerWorkexpSchema = Joi.object({
 });
 export const deleteFreelancerWorkexpSchema = Joi.object({
   id: Joi.number().required(),
+});
+
+// CHANGE PASSWORD
+export const checkpasswordSchema = Joi.object({
+  password: Joi.string().required(),
+});
+export const updatepasswordSchema = Joi.object({
+  password: Joi.string().required(),
+});
+export const updateCredentialSchema = Joi.object({
+  email: Joi.string(),
+  phn_num: Joi.string(),
+  c_code: Joi.string(),
 });

@@ -5,6 +5,8 @@ import {
   sendResponse,
 } from "../utils/helper.js";
 import {
+  addFreelancerLanguagesSchema,
+  checkpasswordSchema,
   createFreelancerEducationSchema,
   createFreelancerPositionSchema,
   createFreelancerProfileSchema,
@@ -13,15 +15,26 @@ import {
   createFreelancerWorkexpSchema,
   deleteFreelancerEducationSchema,
   deleteFreelancerWorkexpSchema,
+  updateCredentialSchema,
+  updateFreelancerAddressSchema,
   updateFreelancerEducationSchema,
+  updateFreelancerLanguagesSchema,
+  updateFreelancerPositionSchema,
+  updateFreelancerPreferenceSchema,
+  updateFreelancerProfileSchema,
+  updateFreelancerSkillsSchema,
   updateFreelancerWorkexpSchema,
+  updatepasswordSchema,
   validateRequest,
 } from "../utils/validator.js";
 import { pool } from "../config/db.js";
 import { authModel } from "../model/auth.model.js";
 import { freelancerModel } from "../model/freelancer-profile.model.js";
+import bcrypt from "bcrypt";
+import { supportModel } from "../model/support.model.js";
 const authMdl = new authModel();
 const freelancerMdl = new freelancerModel();
+const supportMdl = new supportModel();
 
 // FREELANCER ONBOARDING PROFILE
 export const createFreelancerProfile = async (req, res) => {
@@ -1042,7 +1055,448 @@ export const getFreelancerProfile = async (req, res) => {
 // UPDATE FREELANCER PROFILE
 export const updateFreelancerProfile = async (req, res) => {
   try {
+    const validatedData = validateRequest(
+      updateFreelancerProfileSchema,
+      req.body,
+      res,
+    );
+    const user_id = req.user.user_id;
+    const { name, profile_pic, about } = validatedData;
+
+    let freelancer_id = await freelancerMdl.fetchFreelancerId({ user_id });
+    freelancer_id = freelancer_id?.data[0]?.id;
+
+    const query = [];
+    const params = [];
+
+    if (name) {
+      query.push("name = ?");
+      params.push(name);
+    }
+    if (profile_pic) {
+      query.push("profile_pic = ?");
+      params.push(profile_pic);
+    }
+    if (about) {
+      query.push("about = ?");
+      params.push(about);
+    }
+
+    params.push(freelancer_id);
+
+    const result = await freelancerMdl.updateFreelancerProfile({
+      query,
+      params,
+    });
+
+    if (result?.success === 0) {
+      return sendResponse(
+        res,
+        200,
+        0,
+        "Failed to update freelancer profile",
+        [],
+        "",
+      );
+    } else if (result?.success === 1) {
+      return sendResponse(res, 200, 1, "Freelancer profile updated", [], "");
+    }
   } catch (error) {
     return getServerError(res, error);
+  }
+};
+
+export const updateFreelancerPosition = async (req, res) => {
+  try {
+    const validatedData = validateRequest(
+      updateFreelancerPositionSchema,
+      req.body,
+      res,
+    );
+    const user_id = req.user.user_id;
+    const { id, position_id, experience_id } = validatedData;
+
+    let freelancer_id = await freelancerMdl.fetchFreelancerId({ user_id });
+    freelancer_id = freelancer_id?.data[0]?.id;
+
+    const result = await freelancerMdl.updateFreelancerPosition({
+      id,
+      freelancer_id,
+      position_id,
+      experience_id,
+    });
+
+    if (result?.success === 0) {
+      return sendResponse(
+        res,
+        200,
+        0,
+        "Failed to update freelancer position",
+        [],
+        "",
+      );
+    } else if (result?.success === 1) {
+      return sendResponse(res, 200, 1, "Freelancer position updated", [], "");
+    }
+  } catch (error) {
+    return getServerError(res, error);
+  }
+};
+
+export const updateFreelacnerSkills = async (req, res) => {
+  let connection;
+  try {
+    const validatedData = validateRequest(
+      updateFreelancerSkillsSchema,
+      req.body,
+      res,
+    );
+    const user_id = req.user.user_id;
+    const { skill_id } = validatedData;
+
+    let freelancer_id = await freelancerMdl.fetchFreelancerId({ user_id });
+    freelancer_id = freelancer_id?.data[0]?.id;
+
+    let db_skill_id = await freelancerMdl.fetchFreelancerSkillIds({
+      freelancer_id,
+    });
+
+    const existing_skills = db_skill_id?.data.map((row) => row.id);
+    const new_skills = skill_id;
+
+    const delete_skill = existing_skills.filter(
+      (id) => !new_skills.includes(id),
+    );
+    const add_skill = new_skills.filter((id) => !existing_skills.includes(id));
+
+    connection = await pool.getConnection();
+    await connection.beginTransaction();
+
+    for (const id of delete_skill) {
+      const delete_result = await freelancerMdl.deleteFreelancerSkills(
+        { id, freelancer_id },
+        connection,
+      );
+      if (delete_result?.success === 0) {
+        if (connection) {
+          await connection.rollback();
+        }
+        return sendResponse(res, 200, 0, "Failed to update skills", [], "");
+      }
+    }
+
+    for (const id of add_skill) {
+      const insert_result = await freelancerMdl.addFreelancerSkills(
+        { id, freelancer_id },
+        connection,
+      );
+      if (insert_result?.success === 0) {
+        if (connection) {
+          await connection.rollback();
+        }
+        return sendResponse(res, 200, 0, "Failed to update skills", [], "");
+      }
+    }
+
+    await connection.commit();
+    return sendResponse(res, 200, 1, "Skills updated successfully", [], "");
+  } catch (error) {
+    if (connection) {
+      await connection.rollback();
+    }
+    return getServerError(res, error);
+  } finally {
+    if (connection) {
+      connection.release();
+    }
+  }
+};
+
+export const updateFreelancerLanguages = async (req, res) => {
+  let connection;
+  try {
+    const validatedData = validateRequest(
+      updateFreelancerLanguagesSchema,
+      req.body,
+      res,
+    );
+    const user_id = req.user.user_id;
+    const { languages } = validatedData;
+
+    let freelancer_id = await freelancerMdl.fetchFreelancerId({ user_id });
+    freelancer_id = freelancer_id?.data[0]?.id;
+    let result;
+
+    connection = await pool.getConnection();
+    await connection.beginTransaction();
+
+    for (const row of languages) {
+      const id = row.id;
+      const language_id = row.language_id;
+      const proficiency_id = row.proficiency_id;
+      result = await freelancerMdl.updateFreelancerLanguages(
+        {
+          id,
+          language_id,
+          proficiency_id,
+          freelancer_id,
+        },
+        connection,
+      );
+      if (result?.success === 0) {
+        if (connection) {
+          await connection.rollback();
+        }
+        return sendResponse(res, 200, 0, "Failed to update language", [], "");
+      }
+    }
+
+    await connection.commit();
+    if (result?.success === 1) {
+      return sendResponse(res, 200, 1, "Language updated successfully", [], "");
+    }
+  } catch (error) {
+    return getServerError(res, error);
+  }
+};
+
+export const addFreelancerLanguages = async (req, res) => {
+  try {
+    const validatedData = validateRequest(
+      addFreelancerLanguagesSchema,
+      req.body,
+      res,
+    );
+    const user_id = req.user.user_id;
+    const { languages } = validatedData;
+
+    let freelancer_id = await freelancerMdl.fetchFreelancerId({ user_id });
+    freelancer_id = freelancer_id?.data[0]?.id;
+    let result;
+
+    // console.log(languages, freelancer_id);
+
+    for (const row of languages) {
+      const language_id = row.language_id;
+      const proficiency_id = row.proficiency_id;
+      result = await freelancerMdl.addFreelancerSkills({
+        language_id,
+        proficiency_id,
+        freelancer_id,
+      });
+    }
+    if (result?.success === 1) {
+      return sendResponse(res, 200, 1, "Language added successfully", [], "");
+    } else if (result?.success === 0) {
+      return sendResponse(res, 200, 0, "Failed to add language", [], "");
+    }
+  } catch (error) {
+    return getServerError(res, error);
+  }
+};
+
+export const updateFreelancerAddress = async (req, res) => {
+  try {
+    const validatedData = validateRequest(
+      updateFreelancerAddressSchema,
+      req.body,
+      res,
+    );
+    const user_id = req.user.user_id;
+    const { zip_code, address, city, state, country } = validatedData;
+
+    let freelancer_id = await freelancerMdl.fetchFreelancerId({ user_id });
+    freelancer_id = freelancer_id?.data[0]?.id;
+
+    const result = await freelancerMdl.updateFreelancerAddress({
+      zip_code,
+      address,
+      city,
+      state,
+      country,
+      freelancer_id,
+    });
+
+    if (result?.success === 1) {
+      return sendResponse(res, 200, 1, "Address updated successfully", [], "");
+    } else if (result?.success === 0) {
+      return sendResponse(res, 200, 0, "Failed to update address", [], "");
+    }
+  } catch (error) {
+    return getServerError(res, error);
+  }
+};
+
+export const updateFreelancerPreferences = async (req, res) => {
+  try {
+    const validatedData = validateRequest(
+      updateFreelancerPreferenceSchema,
+      req.body,
+      res,
+    );
+    const user_id = req.user.user_id;
+    const { is_available, is_notification } = validatedData;
+
+    let freelancer_id = await freelancerMdl.fetchFreelancerId({ user_id });
+    freelancer_id = freelancer_id?.data[0]?.id;
+
+    let column_name = [];
+    let params = [];
+    if (is_available !== undefined) {
+      column_name.push("is_available = ?");
+      params.push(is_available);
+    }
+    if (is_notification !== undefined) {
+      column_name.push("is_notification = ?");
+      params.push(is_notification);
+    }
+    params.push(freelancer_id);
+
+    const result = await freelancerMdl.updateFreelancerPreference({
+      column_name,
+      params,
+      freelancer_id,
+    });
+    if (result?.success === 1) {
+      return sendResponse(res, 200, 1, "Preference updated", [], "");
+    } else if (result?.success === 0) {
+      return sendResponse(res, 200, 0, "Failed to update Preference", [], "");
+    }
+  } catch (error) {
+    return sendResponse(res, error);
+  }
+};
+
+export const updateFreelancerPassword = async (req, res) => {
+  try {
+    const validatedData = validateRequest(updatepasswordSchema, req.body, res);
+    const user_id = req.user.user_id;
+    const { password } = validatedData;
+
+    const salt = 10;
+    const hashed_pwd = bcrypt.hash(password, salt);
+
+    const result = await freelancerMdl.updateFreelancerPassword({
+      user_id,
+      password,
+    });
+
+    if (result?.success === 0) {
+      return sendResponse(res, 200, 0, "Failed to update password", [], "");
+    } else if (result?.success === 1) {
+      return sendResponse(res, 200, 1, "Password updated", [], "");
+    }
+  } catch (error) {
+    return getServerError(res, error);
+  }
+};
+
+export const updateFreelancerCredential = async (req, res) => {
+  let connection;
+  try {
+    const validatedData = validateRequest(
+      updateCredentialSchema,
+      req.body,
+      res,
+    );
+    const user_id = req.user.user_id;
+    const { email, phn_num, c_code } = validatedData;
+
+    connection = await pool.getConnection();
+    await connection.beginTransaction();
+
+    if (email) {
+      const is_email_verify = await authMdl.is_email_num_verified({ email });
+      if (
+        is_email_verify?.data.length < 1 ||
+        is_email_verify?.data[0]?.is_verified !== 1
+      ) {
+        if (connection) {
+          await connection.rollback();
+        }
+        return sendResponse(res, 200, 0, "verify your email address", [], "");
+      }
+      const freelancer_result = await freelancerMdl.updateFreelancerEmail(
+        {
+          email,
+          user_id,
+        },
+        connection,
+      );
+      const user_result = await supportMdl.updateUserEmail(
+        { email, user_id },
+        connection,
+      );
+
+      if (freelancer_result?.success === 0 || user_result?.success === 0) {
+        if (connection) {
+          await connection.rollback();
+        }
+        return sendResponse(res, 200, 0, "Failed to update email", [], "");
+      } else if (
+        freelancer_result?.success === 1 &&
+        user_result?.success === 1
+      ) {
+        if (connection) {
+          await connection.commit();
+        }
+        return sendResponse(res, 200, 1, "Email updated successfully", [], "");
+      }
+    }
+    if (phn_num && c_code) {
+      const is_email_verify = await authMdl.is_email_num_verified({ phn_num });
+      if (
+        is_email_verify?.data.length < 1 ||
+        is_email_verify?.data[0]?.is_verified !== 1
+      ) {
+        if (connection) {
+          await connection.rollback();
+        }
+        return sendResponse(res, 200, 0, "verify your mobile number", [], "");
+      }
+      const freelancer_result = await freelancerMdl.updateFreelancerPhn_num(
+        {
+          phn_num,
+          c_code,
+          user_id,
+        },
+        connection,
+      );
+      const user_result = await supportMdl.updateUserPhn_num(
+        { phn_num, c_code, user_id },
+        connection,
+      );
+
+      if (freelancer_result?.success === 0 || user_result?.success === 0) {
+        if (connection) {
+          await connection.rollback();
+        }
+        return sendResponse(res, 200, 0, "Failed to update number", [], "");
+      } else if (
+        freelancer_result?.success === 1 &&
+        user_result?.success === 1
+      ) {
+        if (connection) {
+          await connection.commit();
+        }
+        return sendResponse(
+          res,
+          200,
+          1,
+          "Mobile number updated successfully",
+          [],
+          "",
+        );
+      }
+    }
+  } catch (error) {
+    if (connection) {
+      await connection.rollback();
+    }
+    return getServerError(res, error);
+  } finally {
+    if (connection) {
+      connection.release();
+    }
   }
 };

@@ -6,6 +6,7 @@ import dropdownroutes from "./dropdowns.routes.js";
 import projectroutes from "./project.routes.js";
 import categoryroutes from "./category.routes.js";
 import freelancerroutes from "./freelancer-profile.routes.js";
+import supportroutes from "./support.route.js";
 import { verifyToken } from "../middleware/verifyToken.middleware.js";
 
 const router = express.Router();
@@ -17,5 +18,6 @@ router.use("/dropdowns", dropdownroutes);
 router.use("/project", verifyToken, projectroutes);
 router.use("/category", categoryroutes);
 router.use("/freelancer", verifyToken, freelancerroutes);
+router.use("/support", verifyToken, supportroutes);
 
 export default router;
