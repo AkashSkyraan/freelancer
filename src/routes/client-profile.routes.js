@@ -22,4 +22,20 @@ router.post(
 );
 router.post("/getprofile", clientcontroller.getClientProfile);
 
+router.post(
+  "/updatepwd",
+  verifyRole(["CLIENT"]),
+  clientcontroller.updateClientPassword,
+);
+router.post(
+  "/updatecredential",
+  verifyRole(["CLIENT"]),
+  clientcontroller.updateClientCredential,
+);
+router.post(
+  "/preference",
+  verifyRole(["CLIENT"]),
+  clientcontroller.updateClientPreferences,
+);
+
 export default router;

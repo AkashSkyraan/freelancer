@@ -654,12 +654,12 @@ export class freelancerModel {
   }
 
   // UPDATE PROFILE PASSWORD
-  async updateFreelancerPassword({ user_id, password }) {
+  async updateFreelancerPassword({ user_id, hashed_pwd }) {
     let query;
     let params;
 
     query = `UPDATE users SET password = ? WHERE user_id = ?`;
-    params = [password, user_id];
+    params = [hashed_pwd, user_id];
 
     const result = await executeQuery(query, params);
 
@@ -709,6 +709,29 @@ export class freelancerModel {
     params = [phn_num, c_code, user_id];
 
     const result = await executeQuery(query, params, connection);
+
+    if (result?.success === 1) {
+      return {
+        success: 1,
+        data: result?.data,
+      };
+    } else if (result?.success === 0) {
+      return {
+        success: 0,
+        error: result?.error,
+      };
+    }
+  }
+
+  // SEARCH PROJECTS
+  async searchProjects({ categoties, experience, price, keyword, location }) {
+    let query;
+    let params;
+
+    query = `SELECT p.* FROM projects p, d.value AS position, e.value AS experience, pt.value AS price_type JOIN dropdown_master d ON d.id = p.talent_role AND d.category = 'positions' JOIN dropdown_master e ON e.id = p.experience AND e.category = 'experience' JOIN dropdown_master pt ON pt.id = p.price_type AND pt.category = 'price_type' WHERE 1 = 1`;
+    params = [];
+
+    const result = await executeQuery(query, params);
 
     if (result?.success === 1) {
       return {

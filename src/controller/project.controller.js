@@ -12,8 +12,10 @@ import {
   updateProjectSchema,
   validateRequest,
 } from "../utils/validator.js";
+import { clientModel } from "../model/client-profile.model.js";
 
 const projectMdl = new projectModel();
+const clientMdl = new clientModel();
 
 export const createProject = async (req, res) => {
   try {
@@ -32,6 +34,16 @@ export const createProject = async (req, res) => {
       open_position,
     } = validatedData;
 
+    const location_result = await clientMdl.fetchClientLocation({ user_id });
+
+    const zip_code = location_result?.data[0]?.zip_code;
+    const city = location_result?.data[0]?.city;
+    const state = location_result?.data[0]?.state;
+    const country = location_result?.data[0]?.country;
+    const address = location_result?.data[0]?.address;
+    const lat = location_result?.data[0]?.lat;
+    const lng = location_result?.data[0]?.lng;
+
     const result = await projectMdl.createProject({
       user_id,
       title,
@@ -44,6 +56,13 @@ export const createProject = async (req, res) => {
       price,
       price_type,
       open_position,
+      address,
+      city,
+      state,
+      country,
+      zip_code,
+      lat,
+      lng,
     });
     if (result?.success === 1) {
       return sendResponse(res, 200, 1, "project created successfully", [], "");

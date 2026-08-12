@@ -1,5 +1,6 @@
 import express from "express";
 import {
+  forgotPasswordSchema,
   loginSchema,
   signUpSchema,
   validateRequest,
@@ -79,7 +80,7 @@ export const requestOtp = async (req, res) => {
 export const verifyOtp = async (req, res) => {
   try {
     const validatedData = validateRequest(verifyOtpSchema, req.body, res);
-    const { email, phn_num, c_code, otp } = validatedData;
+    const { email, phn_num, c_code, otp, type } = validatedData;
 
     if (email && (phn_num || c_code)) {
       return sendResponse(
@@ -108,8 +109,22 @@ export const verifyOtp = async (req, res) => {
 
     await authMdl.verifyOtp(data?.id);
 
-    if (result?.success === 1) {
-      return sendResponse(res, 200, 1, "otp verified successfully", [otp], "");
+    if (result?.success === 1 && type === 0) {
+      return sendResponse(res, 200, 1, "otp verified successfully", [], "");
+    } else if (result?.success === 1 && type === 1) {
+      const reset_token = await jwt.sign(
+        { email },
+        process.env.JWT_RESET_TOKEN_KEY,
+        { expiresIn: "6m" },
+      );
+      return sendResponse(
+        res,
+        200,
+        1,
+        "Otp verified successfully",
+        [reset_token],
+        "",
+      );
     } else if (result?.success === 0) {
       return sendResponse(res, 200, 0, "failed to verify otp", [], "");
     }
@@ -121,11 +136,11 @@ export const verifyOtp = async (req, res) => {
 export const signUp = async (req, res) => {
   let connection;
   try {
-    const { email, password, role } = req.body;
+    const { email, password, user_role } = req.body;
 
     const allowed_roles = ["CLIENT", "FREELANCER"];
 
-    if (!allowed_roles.includes(role)) {
+    if (!allowed_roles.includes(user_role)) {
       return sendResponse(res, 200, 0, "Invalid role", [], "");
     }
 
@@ -149,7 +164,7 @@ export const signUp = async (req, res) => {
     const user_id = await generateUserId();
 
     const token = jwt.sign(
-      { email, role, user_id },
+      { email, user_role, user_id },
       process.env.JWT_SECRET_KEY,
     );
 
@@ -160,7 +175,7 @@ export const signUp = async (req, res) => {
       connection,
     );
     const register_role = await authMdl.registerRole(
-      { user_id, role },
+      { user_id, user_role },
       connection,
     );
 
@@ -217,6 +232,27 @@ export const login = async (req, res) => {
       return sendResponse(res, 200, 1, "login successfull", [token], "");
     } else {
       return sendResponse(res, 200, 0, "Invalid credentials", [], "");
+    }
+  } catch (error) {
+    return getServerError(res, error);
+  }
+};
+
+export const forgotPassword = async (req, res) => {
+  try {
+    const validatedData = validateRequest(forgotPasswordSchema, req.body, res);
+    const email = req.user.email;
+    const { password } = validatedData;
+
+    const salt = 10;
+    const hashed_pwd = await bcrypt.hash(password, salt);
+
+    const result = await authMdl.forgotPassword({ email, hashed_pwd });
+
+    if (result?.success === 1) {
+      return sendResponse(res, 200, 1, "Password changed successfully", [], "");
+    } else if (result?.success === 0) {
+      return sendResponse(res, 200, 0, "Failed to update password", [], "");
     }
   } catch (error) {
     return getServerError(res, error);

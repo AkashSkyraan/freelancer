@@ -41,13 +41,14 @@ export const verifyOtpSchema = Joi.object({
   c_code: Joi.string().required().length(3).allow(""),
 
   otp: Joi.string().required().length(6),
+  type: Joi.number().valid(0, 1).required(),
 });
 export const signUpSchema = Joi.object({
   email: Joi.string().email().required().min(16),
 
   password: Joi.string().required().min(6),
 
-  role: Joi.string().required().valid("CLIENT", "FREELANCER").messages({
+  user_role: Joi.string().required().valid("CLIENT", "FREELANCER").messages({
     "any.only": "Invalid role.",
     "any.required": "Role is required.",
   }),
@@ -61,6 +62,9 @@ export const loginSchema = Joi.object({
     "any.only": "Invalid role.",
     "any.required": "Role is required.",
   }),
+});
+export const forgotPasswordSchema = Joi.object({
+  password: Joi.string().required().min(6),
 });
 
 //DROPDOWN MASTER SCHEMA'S
@@ -110,6 +114,10 @@ export const createCProfileSchema = Joi.object({
 
   country: Joi.string().required(),
 
+  lat: Joi.string().required(),
+
+  lng: Joi.string().required(),
+
   about: Joi.string().required(),
 });
 export const updateCProfileSchema = Joi.object({
@@ -158,8 +166,8 @@ export const createProjectSchema = Joi.object({
   duration: Joi.number().required(),
   duration_type: Joi.string().required(),
   experience: Joi.number().required(),
-  price: Joi.string().required(),
-  price_type: Joi.string().required(),
+  price: Joi.number().integer().required(),
+  price_type: Joi.number().integer().required(),
   open_position: Joi.number().required(),
 });
 export const deleteProjectSchema = Joi.object({
@@ -348,4 +356,13 @@ export const updateCredentialSchema = Joi.object({
   email: Joi.string(),
   phn_num: Joi.string(),
   c_code: Joi.string(),
+});
+
+// SEARCH PROJECT
+export const searchProjectSchema = Joi.object({
+  categories: Joi.array().items(Joi.number().integer()).unique().required(),
+  experience: Joi.array().items(Joi.number().integer()).unique().required(),
+  price: Joi.array().items(Joi.number().integer()).unique().required(),
+  keyword: Joi.string().required().allow(""),
+  location: Joi.string().required().allow(""),
 });

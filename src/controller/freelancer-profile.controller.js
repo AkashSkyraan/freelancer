@@ -15,6 +15,7 @@ import {
   createFreelancerWorkexpSchema,
   deleteFreelancerEducationSchema,
   deleteFreelancerWorkexpSchema,
+  searchProjectSchema,
   updateCredentialSchema,
   updateFreelancerAddressSchema,
   updateFreelancerEducationSchema,
@@ -1374,11 +1375,11 @@ export const updateFreelancerPassword = async (req, res) => {
     const { password } = validatedData;
 
     const salt = 10;
-    const hashed_pwd = bcrypt.hash(password, salt);
+    const hashed_pwd = await bcrypt.hash(password, salt);
 
     const result = await freelancerMdl.updateFreelancerPassword({
       user_id,
-      password,
+      hashed_pwd,
     });
 
     if (result?.success === 0) {
@@ -1498,5 +1499,33 @@ export const updateFreelancerCredential = async (req, res) => {
     if (connection) {
       connection.release();
     }
+  }
+};
+
+// SEARCH PROJECT
+
+export const searchProject = async (req, res) => {
+  try {
+    // console.log(req.body);
+    const validatedData = validateRequest(searchProjectSchema, req.body, res);
+    const user_id = req.user.user_id;
+    const { categories, experience, price, keyword, location } = validatedData;
+
+    const result = await freelancerMdl.searchProjects({
+      categories,
+      experience,
+      price,
+      keyword,
+      location,
+    });
+    console.log(result);
+
+    if (result?.success === 0) {
+      return sendResponse(res, 200, 0, "Failed to fetch projects", [], "");
+    } else if (result?.success === 1) {
+      return sendResponse(res, 200, 1, "Projects fetched successfully", [], "");
+    }
+  } catch (error) {
+    return getServerError(res, error);
   }
 };

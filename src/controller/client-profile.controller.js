@@ -9,14 +9,20 @@ import {
   createProjectSchema,
   deleteClientProfileSchema,
   updateCProfileSchema,
+  updateCredentialSchema,
+  updateFreelancerPreferenceSchema,
+  updatepasswordSchema,
   validateRequest,
 } from "../utils/validator.js";
 import { clientModel } from "../model/client-profile.model.js";
 import { authModel } from "../model/auth.model.js";
 import { pool } from "../config/db.js";
+import bcrypt from "bcrypt";
+import { supportModel } from "../model/support.model.js";
 
 const clientMdl = new clientModel();
 const authMdl = new authModel();
+const supportMdl = new supportModel();
 
 export const createClientProfile = async (req, res) => {
   let connection;
@@ -38,6 +44,8 @@ export const createClientProfile = async (req, res) => {
       city,
       state,
       country,
+      lat,
+      lng,
       about,
     } = validatedData;
 
@@ -114,6 +122,8 @@ export const createClientProfile = async (req, res) => {
         city,
         state,
         country,
+        lat,
+        lng,
         about,
         is_email_verified,
         is_number_verified,
@@ -362,5 +372,179 @@ export const getClientProfile = async (req, res) => {
     }
   } catch (error) {
     return getServerError(res, error);
+  }
+};
+
+export const updateClientPassword = async (req, res) => {
+  try {
+    const validatedData = validateRequest(updatepasswordSchema, req.body, res);
+    const user_id = req.user.user_id;
+    const { password } = validatedData;
+
+    const salt = 10;
+    const hashed_pwd = await bcrypt.hash(password, salt);
+
+    const result = await clientMdl.updateClientPassword({
+      user_id,
+      hashed_pwd,
+    });
+
+    if (result?.success === 0) {
+      return sendResponse(res, 200, 0, "Failed to update password", [], "");
+    } else if (result?.success === 1) {
+      return sendResponse(res, 200, 1, "Password updated", [], "");
+    }
+  } catch (error) {
+    return getServerError(res, error);
+  }
+};
+
+export const updateClientCredential = async (req, res) => {
+  let connection;
+  try {
+    const validatedData = validateRequest(
+      updateCredentialSchema,
+      req.body,
+      res,
+    );
+    const user_id = req.user.user_id;
+    const { email, phn_num, c_code } = validatedData;
+
+    connection = await pool.getConnection();
+    await connection.beginTransaction();
+
+    if (email) {
+      const is_email_verify = await authMdl.is_email_num_verified({ email });
+      if (
+        is_email_verify?.data.length < 1 ||
+        is_email_verify?.data[0]?.is_verified !== 1
+      ) {
+        if (connection) {
+          await connection.rollback();
+        }
+        return sendResponse(res, 200, 0, "verify your email address", [], "");
+      }
+      const freelancer_result = await clientMdl.updateClientEmail(
+        {
+          email,
+          user_id,
+        },
+        connection,
+      );
+      const user_result = await supportMdl.updateUserEmail(
+        { email, user_id },
+        connection,
+      );
+
+      if (freelancer_result?.success === 0 || user_result?.success === 0) {
+        if (connection) {
+          await connection.rollback();
+        }
+        return sendResponse(res, 200, 0, "Failed to update email", [], "");
+      } else if (
+        freelancer_result?.success === 1 &&
+        user_result?.success === 1
+      ) {
+        if (connection) {
+          await connection.commit();
+        }
+        return sendResponse(res, 200, 1, "Email updated successfully", [], "");
+      }
+    }
+    if (phn_num && c_code) {
+      const is_email_verify = await authMdl.is_email_num_verified({ phn_num });
+      if (
+        is_email_verify?.data.length < 1 ||
+        is_email_verify?.data[0]?.is_verified !== 1
+      ) {
+        if (connection) {
+          await connection.rollback();
+        }
+        return sendResponse(res, 200, 0, "verify your mobile number", [], "");
+      }
+      const freelancer_result = await clientMdl.updateClientPhn_num(
+        {
+          phn_num,
+          c_code,
+          user_id,
+        },
+        connection,
+      );
+      const user_result = await supportMdl.updateUserPhn_num(
+        { phn_num, c_code, user_id },
+        connection,
+      );
+
+      if (freelancer_result?.success === 0 || user_result?.success === 0) {
+        if (connection) {
+          await connection.rollback();
+        }
+        return sendResponse(res, 200, 0, "Failed to update number", [], "");
+      } else if (
+        freelancer_result?.success === 1 &&
+        user_result?.success === 1
+      ) {
+        if (connection) {
+          await connection.commit();
+        }
+        return sendResponse(
+          res,
+          200,
+          1,
+          "Mobile number updated successfully",
+          [],
+          "",
+        );
+      }
+    }
+  } catch (error) {
+    if (connection) {
+      await connection.rollback();
+    }
+    return getServerError(res, error);
+  } finally {
+    if (connection) {
+      connection.release();
+    }
+  }
+};
+
+export const updateClientPreferences = async (req, res) => {
+  try {
+    const validatedData = validateRequest(
+      updateFreelancerPreferenceSchema,
+      req.body,
+      res,
+    );
+    const user_id = req.user.user_id;
+    const { is_available, is_notification } = validatedData;
+
+    let freelancer_id = await clientMdl.fetchClientId({ user_id });
+    freelancer_id = freelancer_id?.data[0]?.id;
+
+    let column_name = [];
+    let params = [];
+    if (is_available !== undefined) {
+      column_name.push("is_available = ?");
+      params.push(is_available);
+    }
+    if (is_notification !== undefined) {
+      column_name.push("is_notification = ?");
+      params.push(is_notification);
+    }
+    params.push(freelancer_id);
+
+    const result = await clientMdl.updateClientPreference({
+      column_name,
+      params,
+      freelancer_id,
+    });
+    if (result?.success === 1) {
+      return sendResponse(res, 200, 1, "Preference updated", [], "");
+    } else if (result?.success === 0) {
+      return sendResponse(res, 200, 0, "Failed to update Preference", [], "");
+    }
+  } catch (error) {
+    return sendResponse(res, error);
   }
 };

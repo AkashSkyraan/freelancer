@@ -37,11 +37,11 @@
  *                 type: number
  *                 example: 1
  *               price:
- *                 type: string
- *                 example: "10000"
+ *                 type: number
+ *                 example: 10000
  *               price_type:
- *                 type: string
- *                 example: "fixed"
+ *                 type: number
+ *                 example: 2
  *               open_position:
  *                 type: number
  *                 example: 06

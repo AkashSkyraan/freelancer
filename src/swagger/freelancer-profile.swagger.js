@@ -744,4 +744,51 @@
  */
 // #endregion
 
+// #region Update Freelancer Credentials
+/**
+ * @swagger
+ * /api/freelancer/searchproject:
+ *   post:
+ *     tags:
+ *       - Freelancer Profile
+ *     summary: Search project
+ *     description: Search project.
+ *
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               categories:
+ *                 type: array
+ *                 items:
+ *                  type: integer
+ *                 example: [1,2,3,4]
+ *               experience:
+ *                 type: array
+ *                 items:
+ *                  type: integer
+ *                 example: [1,2,3,4]
+ *               price:
+ *                 type: array
+ *                 items:
+ *                  type: integer
+ *                 example: [1,2,3,4]
+ *               keyword:
+ *                 type: string
+ *                 example: react
+ *               location:
+ *                 type: string
+ *                 example: coimbatore
+ *     responses:
+ *       200:
+ *         $ref: '#/components/responses/SuccessResponse'
+ *
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
+// #endregion
+
 export {};

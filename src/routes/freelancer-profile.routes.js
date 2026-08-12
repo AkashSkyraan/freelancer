@@ -112,4 +112,11 @@ router.post(
   freelancercontroller.updateFreelancerCredential,
 );
 
+// SEARCH PROJECT
+router.post(
+  "/searchproject",
+  verifyRole(["FREELANCER"]),
+  freelancercontroller.searchProject,
+);
+
 export default router;

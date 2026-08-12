@@ -66,6 +66,9 @@
  *               otp:
  *                 type: string
  *                 example: "123456"
+ *               type:
+ *                 type: number
+ *                 example: 0
  *
  *     responses:
  *       200:
@@ -137,6 +140,38 @@
  *               role:
  *                 type: string
  *                 example: "CLIENT"
+ *     responses:
+ *       200:
+ *         $ref: '#/components/responses/SuccessResponse'
+ *
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
+// #endregion
+
+// #region Login User
+/**
+ * @swagger
+ * /api/auth/forgot-pwd:
+ *   post:
+ *     tags:
+ *       - Auth
+ *     summary: User forgot password
+ *     description: Forgot password change.
+ *
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 example: test12@gmail.com
+ *               password:
+ *                 type: string
+ *                 example: "password@123"
  *     responses:
  *       200:
  *         $ref: '#/components/responses/SuccessResponse'

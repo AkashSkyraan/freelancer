@@ -14,11 +14,18 @@ export class projectModel {
     price,
     price_type,
     open_position,
+    address,
+    city,
+    state,
+    country,
+    zip_code,
+    lat,
+    lng,
   }) {
     let query;
     let params;
 
-    query = `INSERT INTO projects (user_id, title, descp, skills, talent_role, duration, duration_type, experience, price, price_type, open_position) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+    query = `INSERT INTO projects (user_id, title, descp, skills, talent_role, duration, duration_type, experience, price, price_type, open_position, address, city, state, country, zip_code, lat, lng) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 
     params = [
       user_id,
@@ -32,6 +39,13 @@ export class projectModel {
       price,
       price_type,
       open_position,
+      address,
+      city,
+      state,
+      country,
+      zip_code,
+      lat,
+      lng,
     ];
 
     const result = await executeQuery(query, params);

@@ -141,12 +141,12 @@ export class authModel {
     }
   }
 
-  async registerRole({ user_id, role }, connection = null) {
+  async registerRole({ user_id, user_role }, connection = null) {
     let query;
     let params;
 
     query = `INSERT INTO user_role (user_id, user_role) VALUES (?, ?)`;
-    params = [user_id, role];
+    params = [user_id, user_role];
 
     const result = await executeQuery(query, params, connection);
 
@@ -258,6 +258,27 @@ export class authModel {
 
     query = `SELECT user_id, email FROM users WHERE user_id = ?`;
     params = [user_id];
+    const result = await executeQuery(query, params);
+
+    if (result?.success === 1) {
+      return {
+        success: 1,
+        data: result?.data,
+      };
+    } else if (result?.success === 0) {
+      return {
+        success: 0,
+        error: result?.error,
+      };
+    }
+  }
+
+  async forgotPassword({ email, hashed_pwd }) {
+    let query;
+    let params;
+
+    query = `UPDATE users SET password = ? WHERE email = ?`;
+    params = [hashed_pwd, email];
     const result = await executeQuery(query, params);
 
     if (result?.success === 1) {
