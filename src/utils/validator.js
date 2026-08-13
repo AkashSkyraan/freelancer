@@ -366,3 +366,9 @@ export const searchProjectSchema = Joi.object({
   keyword: Joi.string().required().allow(""),
   location: Joi.string().required().allow(""),
 });
+export const recentSearchSchema = Joi.object({
+  type: Joi.number().required().valid(0, 1),
+});
+export const deleterecentSearchSchema = Joi.object({
+  search_id: Joi.array().items(Joi.number().integer()).unique().required(),
+});

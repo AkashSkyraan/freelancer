@@ -744,7 +744,7 @@
  */
 // #endregion
 
-// #region Update Freelancer Credentials
+// #region Search Project
 /**
  * @swagger
  * /api/freelancer/searchproject:

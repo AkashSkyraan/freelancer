@@ -9,5 +9,19 @@ router.post(
   verifyRole(["FREELANCER", "CLIENT"]),
   supportcontroller.checkPassword,
 );
-
+router.post(
+  "/recentsearch",
+  verifyRole(["FREELANCER", "CLIENT"]),
+  supportcontroller.getRecentSearch,
+);
+router.post(
+  "/deleterecentsearch",
+  verifyRole(["FREELANCER", "CLIENT"]),
+  supportcontroller.deleteRecentSearch,
+);
+router.post(
+  "/gettrendsearch",
+  verifyRole(["FREELANCER", "CLIENT"]),
+  supportcontroller.getTrendingsearch,
+);
 export default router;

@@ -1503,13 +1503,39 @@ export const updateFreelancerCredential = async (req, res) => {
 };
 
 // SEARCH PROJECT
-
 export const searchProject = async (req, res) => {
   try {
     // console.log(req.body);
     const validatedData = validateRequest(searchProjectSchema, req.body, res);
     const user_id = req.user.user_id;
     const { categories, experience, price, keyword, location } = validatedData;
+
+    if (keyword) {
+      const recent_search = await supportMdl.addRecentSearch({
+        user_id,
+        keyword,
+      });
+      const [delete_search, trend_search] = await Promise.all([
+        supportMdl.delete_recent_search({
+          user_id,
+          keyword,
+        }),
+        supportMdl.addTrendingSearch({ user_id, keyword }),
+      ]);
+    }
+    if (location) {
+      const recent_location = await supportMdl.addRecentSearch({
+        user_id,
+        location,
+      });
+      const [delete_search, trend_search] = await Promise.all([
+        supportMdl.delete_recent_search({
+          user_id,
+          location,
+        }),
+        supportMdl.addTrendingSearch({ user_id, location }),
+      ]);
+    }
 
     const result = await freelancerMdl.searchProjects({
       categories,
@@ -1518,12 +1544,20 @@ export const searchProject = async (req, res) => {
       keyword,
       location,
     });
-    console.log(result);
+    // console.log(result);
+    const data = replaceNullWithEmptyString(result?.data);
 
     if (result?.success === 0) {
       return sendResponse(res, 200, 0, "Failed to fetch projects", [], "");
     } else if (result?.success === 1) {
-      return sendResponse(res, 200, 1, "Projects fetched successfully", [], "");
+      return sendResponse(
+        res,
+        200,
+        1,
+        "Projects fetched successfully",
+        data,
+        "",
+      );
     }
   } catch (error) {
     return getServerError(res, error);

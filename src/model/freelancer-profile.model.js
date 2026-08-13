@@ -724,12 +724,70 @@ export class freelancerModel {
   }
 
   // SEARCH PROJECTS
-  async searchProjects({ categoties, experience, price, keyword, location }) {
+  async searchProjects({ categories, experience, price, keyword, location }) {
     let query;
-    let params;
+    let params = [];
 
-    query = `SELECT p.* FROM projects p, d.value AS position, e.value AS experience, pt.value AS price_type JOIN dropdown_master d ON d.id = p.talent_role AND d.category = 'positions' JOIN dropdown_master e ON e.id = p.experience AND e.category = 'experience' JOIN dropdown_master pt ON pt.id = p.price_type AND pt.category = 'price_type' WHERE 1 = 1`;
-    params = [];
+    query = `SELECT
+  p.id, p.title, p.descp, p.duration, p.duration_type,
+  p.price, p.open_position, p.project_status,
+  p.address, p.city, p.state, p.country,
+  p.country, p.zip_code, p.lat, p.lng, p.created_at,
+  
+  GROUP_CONCAT(DISTINCT c.name) AS skills,
+  e.value AS experience,
+  pt.value AS price_type
+
+  FROM projects p
+
+  LEFT JOIN categories c ON FIND_IN_SET(c.id, p.skills) > 0
+
+  LEFT JOIN dropdown_master e ON e.id = p.experience
+  AND e.category = 'experience'
+
+  LEFT JOIN dropdown_master pt ON pt.id = p.price_type
+  AND pt.category = 'price_type'
+  
+  WHERE 1 = 1`;
+
+    if (categories?.length) {
+      const conditions = categories
+        .map(() => `FIND_IN_SET(?, p.skills) > 0`)
+        .join(" OR ");
+
+      query += ` AND (${conditions})`;
+      params.push(...categories);
+    }
+    if (experience?.length) {
+      const placeholders = experience.map(() => "?").join(", ");
+
+      query += ` AND p.experience IN (${placeholders})`;
+      params.push(...experience);
+    }
+    if (price?.length) {
+      const placeholders = price.map(() => "?").join(", ");
+
+      query += ` AND p.price_type IN (${placeholders})`;
+      params.push(...price);
+    }
+    if (keyword) {
+      query += ` AND (p.title LIKE ? 
+                 OR p.descp LIKE ? 
+                 OR c.name LIKE ?)`;
+
+      const searchKeyword = `%${keyword}%`;
+      params.push(searchKeyword, searchKeyword, searchKeyword);
+    }
+    if (location) {
+      query += ` AND (p.address LIKE ?
+      OR p.city LIKE ?
+      OR p.state LIKE ?
+      OR p.country LIKE ?)`;
+      const searchKeyword = `%${location}%`;
+      params.push(searchKeyword, searchKeyword, searchKeyword, searchKeyword);
+    }
+
+    query += ` GROUP BY p.id ORDER BY p.created_at DESC`;
 
     const result = await executeQuery(query, params);
 
