@@ -1,5 +1,6 @@
 import express from "express";
 import { executeQuery } from "../utils/helper.js";
+import { projectModel } from "./project.model.js";
 
 export class freelancerModel {
   // FREELANCER ON BOARDING FORM
@@ -730,7 +731,7 @@ export class freelancerModel {
 
     query = `SELECT
   p.id, p.title, p.descp, p.duration, p.duration_type,
-  p.price, p.open_position, p.project_status,
+  p.price, p.open_position, p.project_status, p.views_count,
   p.address, p.city, p.state, p.country,
   p.country, p.zip_code, p.lat, p.lng, p.created_at,
   
@@ -788,6 +789,210 @@ export class freelancerModel {
     }
 
     query += ` GROUP BY p.id ORDER BY p.created_at DESC`;
+
+    const result = await executeQuery(query, params);
+
+    if (result?.success === 1) {
+      return {
+        success: 1,
+        data: result?.data,
+      };
+    } else if (result?.success === 0) {
+      return {
+        success: 0,
+        error: result?.error,
+      };
+    }
+  }
+
+  // SAVED PROJECTS
+  async getSavedProjects({ user_id }) {
+    let query;
+    let params;
+
+    query = `SELECT id, project_id, created_at FROM saved_projects WHERE user_id = ? AND status = ?`;
+    params = [user_id, 1];
+
+    const result = await executeQuery(query, params);
+
+    if (result?.success === 1) {
+      return {
+        success: 1,
+        data: result?.data,
+      };
+    } else if (result?.success === 0) {
+      return {
+        success: 0,
+        error: result?.error,
+      };
+    }
+  }
+  async addSaveProject({ user_id, project_id }) {
+    let query;
+    let params;
+
+    query = `INSERT INTO saved_projects (user_id, project_id) VALUES (?, ?)`;
+    params = [user_id, project_id];
+
+    const result = await executeQuery(query, params);
+
+    if (result?.success === 1) {
+      return {
+        success: 1,
+        data: result?.data,
+      };
+    } else if (result?.success === 0) {
+      return {
+        success: 0,
+        error: result?.error,
+      };
+    }
+  }
+  async updateSavedProject({ user_id, project_id, status }) {
+    let query;
+    let params;
+
+    query = `UPDATE saved_projects SET status = ? WHERE user_id = ? AND project_id = ?`;
+    params = [status, user_id, project_id];
+
+    const result = await executeQuery(query, params);
+
+    if (result?.success === 1) {
+      return {
+        success: 1,
+        data: result?.data,
+      };
+    } else if (result?.success === 0) {
+      return {
+        success: 0,
+        error: result?.error,
+      };
+    }
+  }
+  async checkSavedProject({ user_id, project_id }) {
+    let query;
+    let params;
+
+    query = `SELECT id, user_id, project_id, status FROM saved_projects WHERE user_id = ? AND project_id = ?`;
+    params = [user_id, project_id];
+
+    const result = await executeQuery(query, params);
+
+    if (result?.success === 1) {
+      return {
+        success: 1,
+        data: result?.data,
+      };
+    } else if (result?.success === 0) {
+      return {
+        success: 0,
+        error: result?.error,
+      };
+    }
+  }
+
+  // RECENTLY VISITED PROJECTS
+  async fetchRecentlyVisitedProjects({ user_id, project_id }) {
+    let query;
+    let params;
+
+    query = `SELECT id FROM recently_viewed_projects WHERE user_id = ? AND project_id = ?`;
+    params = [user_id, project_id];
+
+    const result = await executeQuery(query, params);
+
+    if (result?.success === 1) {
+      return {
+        success: 1,
+        data: result?.data,
+      };
+    } else if (result?.success === 0) {
+      return {
+        success: 0,
+        error: result?.error,
+      };
+    }
+  }
+  async addRecentlyVisitedProject({ user_id, project_id }) {
+    let query;
+    let params;
+
+    query = `INSERT INTO recently_viewed_projects (user_id, project_id) VALUES(?, ?)`;
+    params = [user_id, project_id];
+
+    const result = await executeQuery(query, params);
+
+    if (result?.success === 1) {
+      return {
+        success: 1,
+        data: result?.data,
+      };
+    } else if (result?.success === 0) {
+      return {
+        success: 0,
+        error: result?.error,
+      };
+    }
+  }
+  async updateRecentlyVisitedProject({ user_id, project_id }) {
+    let query;
+    let params;
+
+    query = `UPDATE recently_viewed_projects SET updated_at = NOW() WHERE user_id = ? AND project_id = ?`;
+    params = [user_id, project_id];
+
+    const result = await executeQuery(query, params);
+
+    if (result?.success === 1) {
+      return {
+        success: 1,
+        data: result?.data,
+      };
+    } else if (result?.success === 0) {
+      return {
+        success: 0,
+        error: result?.error,
+      };
+    }
+  }
+  async delete_recently_viewed_projects({ user_id, project_id }) {
+    let query;
+    let params;
+
+    query = `DELETE FROM recently_viewed_projects
+WHERE user_id = ?
+  AND id NOT IN (
+      SELECT id
+      FROM (
+          SELECT id
+          FROM recently_viewed_projects
+          WHERE user_id = ?
+          ORDER BY updated_at DESC
+          LIMIT 10
+      ) AS latest);`;
+
+    params = [user_id, user_id];
+
+    const result = await executeQuery(query, params);
+
+    if (result?.success === 1) {
+      return {
+        success: 1,
+        data: result?.data,
+      };
+    } else if (result?.success === 0) {
+      return {
+        success: 0,
+        error: result?.error,
+      };
+    }
+  }
+  async getRecentlyVisitedProject({ user_id }) {
+    let query;
+    let params;
+
+    query = `SELECT project_id FROM recently_viewed_projects WHERE user_id = ? ORDER BY updated_at DESC`;
+    params = [user_id];
 
     const result = await executeQuery(query, params);
 

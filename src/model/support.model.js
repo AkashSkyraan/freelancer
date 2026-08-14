@@ -90,6 +90,7 @@ export class supportModel {
       };
     }
   }
+  // below model is to keep 5 records per user
   async delete_recent_search({ user_id, keyword, location }) {
     let query;
     let params;
@@ -154,6 +155,7 @@ WHERE
       };
     }
   }
+  // this below model is used to delete recent searches, user decides which to delete
   async deleteRecentSearches({ user_id, search_id }) {
     let query;
     let params;

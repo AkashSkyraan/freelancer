@@ -6,6 +6,8 @@ import {
 } from "../utils/helper.js";
 import {
   addFreelancerLanguagesSchema,
+  addRecentlyVisitedProjectSchema,
+  addSaveProjectSchema,
   checkpasswordSchema,
   createFreelancerEducationSchema,
   createFreelancerPositionSchema,
@@ -33,9 +35,11 @@ import { authModel } from "../model/auth.model.js";
 import { freelancerModel } from "../model/freelancer-profile.model.js";
 import bcrypt from "bcrypt";
 import { supportModel } from "../model/support.model.js";
+import { projectModel } from "../model/project.model.js";
 const authMdl = new authModel();
 const freelancerMdl = new freelancerModel();
 const supportMdl = new supportModel();
+const projectMdl = new projectModel();
 
 // FREELANCER ONBOARDING PROFILE
 export const createFreelancerProfile = async (req, res) => {
@@ -1556,6 +1560,261 @@ export const searchProject = async (req, res) => {
         1,
         "Projects fetched successfully",
         data,
+        "",
+      );
+    }
+  } catch (error) {
+    return getServerError(res, error);
+  }
+};
+
+// SAVED PROJECT
+export const getSavedProject = async (req, res) => {
+  try {
+    const user_id = req.user.user_id;
+
+    const result = await freelancerMdl.getSavedProjects({ user_id });
+    if (result?.success === 0) {
+      return sendResponse(res, 200, 0, "Failed to fetch saved project", [], "");
+    }
+
+    const project_ids = result?.data.map((row) => row.project_id);
+
+    const saved_project_result = await projectMdl.getProjects({ project_ids });
+
+    let data = saved_project_result?.data;
+    data = replaceNullWithEmptyString(data);
+
+    if (saved_project_result?.success === 1 && result?.success === 1) {
+      return sendResponse(
+        res,
+        200,
+        1,
+        "saved projects fetched successfully",
+        data,
+        "",
+      );
+    } else if (saved_project_result?.success === 0 || result?.success === 0) {
+      return sendResponse(
+        res,
+        200,
+        0,
+        "Failed to fetch saved projects",
+        [],
+        "",
+      );
+    }
+  } catch (error) {
+    return getServerError(res, error);
+  }
+};
+export const addSaveProject = async (req, res) => {
+  try {
+    const validatedData = validateRequest(addSaveProjectSchema, req.body, res);
+    const { project_id } = validatedData;
+    const user_id = req.user.user_id;
+
+    const already_exist = await freelancerMdl.checkSavedProject({
+      user_id,
+      project_id,
+    });
+    let result;
+
+    if (already_exist?.success === 0) {
+      return sendResponse(res, 200, 0, "Failed to save project", [], "");
+    }
+
+    if (already_exist?.data.length < 1) {
+      result = await freelancerMdl.addSaveProject({
+        user_id,
+        project_id,
+      });
+      if (result?.success === 1) {
+        return sendResponse(res, 200, 1, "Project saved successfully", [], "");
+      } else if (result?.success === 0) {
+        return sendResponse(res, 200, 0, "Failed to save project", [], "");
+      }
+    }
+
+    if (already_exist?.data.length > 0) {
+      if (already_exist?.data[0]?.status === 1) {
+        return sendResponse(res, 200, 0, "Project already saved", [], "");
+      } else if (already_exist?.data[0]?.status === 0) {
+        const status = 1;
+        result = await freelancerMdl.updateSavedProject({
+          user_id,
+          project_id,
+          status,
+        });
+        if (result?.success === 1) {
+          return sendResponse(
+            res,
+            200,
+            1,
+            "Project saved successfully",
+            [],
+            "",
+          );
+        } else if (result?.success === 0) {
+          return sendResponse(res, 200, 0, "Failed to save project", [], "");
+        }
+      }
+    }
+  } catch (error) {
+    return getServerError(res, error);
+  }
+};
+export const unsaveProject = async (req, res) => {
+  try {
+    const validatedData = validateRequest(addSaveProjectSchema, req.body, res);
+    const { project_id } = validatedData;
+    const user_id = req.user.user_id;
+    const status = 0;
+
+    const result = await freelancerMdl.updateSavedProject({
+      user_id,
+      project_id,
+      status,
+    });
+
+    if (result?.success === 1) {
+      return sendResponse(res, 200, 1, "project unsaved successfully", [], "");
+    } else if (result?.success === 0) {
+      return sendResponse(res, 200, 0, "Failed to unsave project", [], "");
+    }
+  } catch (error) {
+    return getServerError(res, error);
+  }
+};
+
+// RECENTLY VISITED PROJECT
+export const addRecentlyVisitedProject = async (req, res) => {
+  try {
+    const validatedData = validateRequest(
+      addRecentlyVisitedProjectSchema,
+      req.body,
+      res,
+    );
+    const { project_id } = validatedData;
+    const user_id = req.user.user_id;
+    let result;
+
+    const is_already_visit = await freelancerMdl.fetchRecentlyVisitedProjects({
+      user_id,
+      project_id,
+    });
+    if (is_already_visit?.success === 0) {
+      return sendResponse(
+        res,
+        200,
+        0,
+        "Failed to add recently visited projects",
+        [],
+        "",
+      );
+    }
+
+    if (is_already_visit?.data.length < 1) {
+      result = await freelancerMdl.addRecentlyVisitedProject({
+        user_id,
+        project_id,
+      });
+      const delete_result = await freelancerMdl.delete_recently_viewed_projects(
+        {
+          user_id,
+          project_id,
+        },
+      );
+      if (result?.success === 1 && delete_result?.success === 1) {
+        return sendResponse(
+          res,
+          200,
+          1,
+          "Recently visited project updated",
+          [],
+          "",
+        );
+      } else if (result?.success === 0 || delete_result?.success === 0) {
+        return sendResponse(
+          res,
+          200,
+          0,
+          "Failed to update recently viewed project",
+          [],
+          "",
+        );
+      }
+    }
+
+    if (is_already_visit?.data.length > 0) {
+      result = await freelancerMdl.updateRecentlyVisitedProject({
+        user_id,
+        project_id,
+      });
+      if (result?.success === 1) {
+        return sendResponse(
+          res,
+          200,
+          1,
+          "Recently visited project updated",
+          [],
+          "",
+        );
+      } else if (result?.success === 0) {
+        return sendResponse(
+          res,
+          200,
+          0,
+          "Failed to update recently viewed project",
+          [],
+          "",
+        );
+      }
+    }
+  } catch (error) {
+    return getServerError(res, error);
+  }
+};
+export const getRecentlyVisitedProject = async (req, res) => {
+  try {
+    const user_id = req.user.user_id;
+
+    const result = await freelancerMdl.getRecentlyVisitedProject({
+      user_id,
+    });
+
+    if (result?.success === 0) {
+      return sendResponse(
+        res,
+        200,
+        0,
+        "Failed to fetch recently visited project",
+        [],
+        "",
+      );
+    }
+
+    const project_ids = result?.data.map((row) => row.project_id);
+
+    const saved_project_result = await projectMdl.getProjects({ project_ids });
+    let data = replaceNullWithEmptyString(saved_project_result?.data);
+
+    if (saved_project_result?.success === 1) {
+      return sendResponse(
+        res,
+        200,
+        1,
+        "Recently visited projects fetched successfully",
+        data,
+        "",
+      );
+    } else if (saved_project_result?.success === 0) {
+      return sendResponse(
+        res,
+        200,
+        0,
+        "Failed to fetch recently visited projects",
+        [],
         "",
       );
     }

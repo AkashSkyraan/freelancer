@@ -148,4 +148,91 @@ export class projectModel {
       };
     }
   }
+  async updateProjectViewCount({ user_id, id }, connection = null) {
+    let query;
+    let params;
+
+    query = `INSERT INTO project_views (user_id, project_id) VALUES (?, ?)`;
+    params = [user_id, id];
+
+    const result = await executeQuery(query, params, connection);
+
+    if (result?.success === 1) {
+      return {
+        success: 1,
+        data: result?.data,
+      };
+    } else if (result?.success === 0) {
+      return {
+        success: 0,
+        error: result?.error,
+      };
+    }
+  }
+  async updateCount({ id }, connection = null) {
+    let query;
+    let params;
+
+    query = `UPDATE projects SET views_count = views_count + 1 WHERE id = ?`;
+    params = [id];
+
+    const result = await executeQuery(query, params, connection);
+
+    if (result?.success === 1) {
+      return {
+        success: 1,
+        data: result?.data,
+      };
+    } else if (result?.success === 0) {
+      return {
+        success: 0,
+        error: result?.error,
+      };
+    }
+  }
+  async getProjects({ project_ids }) {
+    let query;
+    let params;
+
+    const placeholders = project_ids.map(() => "?").join(", ");
+
+    query = `SELECT
+  id,
+  title,
+  descp,
+  skills,
+  talent_role,
+  duration,
+  duration_type,
+  experience,
+  price,
+  price_type,
+  open_position,
+  project_status,
+  views_count,
+  address,
+  city,
+  state,
+  country,
+  zip_code,
+  lat,
+  lng,
+  created_at
+  FROM projects WHERE id IN (${placeholders}) ORDER BY FIELD(id, ${placeholders})`;
+    params = [...project_ids, ...project_ids];
+
+    const result = await executeQuery(query, params);
+
+    if (result?.success === 1) {
+      return {
+        success: 1,
+        data: result?.data,
+      };
+    } else if (result?.success === 0) {
+      return {
+        success: 0,
+        error: result?.error,
+      };
+    }
+  }
 }

@@ -22,4 +22,10 @@ router.post(
 );
 router.post("/getsoloproject", projectcontroller.getSoloProject);
 
+router.post(
+  "/updateviewcount",
+  verifyRole(["FREELANCER"]),
+  projectcontroller.updateViewCount,
+);
+
 export default router;

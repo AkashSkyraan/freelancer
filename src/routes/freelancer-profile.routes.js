@@ -119,4 +119,32 @@ router.post(
   freelancercontroller.searchProject,
 );
 
+// SAVED PROJECTS
+router.post(
+  "/getsavedproject",
+  verifyRole(["FREELANCER"]),
+  freelancercontroller.getSavedProject,
+);
+router.post(
+  "/addsaveproject",
+  verifyRole(["FREELANCER"]),
+  freelancercontroller.addSaveProject,
+);
+router.post(
+  "/unsaveproject",
+  verifyRole(["FREELANCER"]),
+  freelancercontroller.unsaveProject,
+);
+
+// RECENTLY VISITED PROJECTS
+router.post(
+  "/addrecentlyvisitprojects",
+  verifyRole(["FREELANCER"]),
+  freelancercontroller.addRecentlyVisitedProject,
+);
+router.post(
+  "/getrecentlyvisitprojects",
+  verifyRole(["FREELANCER"]),
+  freelancercontroller.getRecentlyVisitedProject,
+);
 export default router;

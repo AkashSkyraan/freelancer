@@ -372,3 +372,12 @@ export const recentSearchSchema = Joi.object({
 export const deleterecentSearchSchema = Joi.object({
   search_id: Joi.array().items(Joi.number().integer()).unique().required(),
 });
+export const updateProjectViewCountSchema = Joi.object({
+  id: Joi.number().integer().required(),
+});
+export const addSaveProjectSchema = Joi.object({
+  project_id: Joi.number().integer().required(),
+});
+export const addRecentlyVisitedProjectSchema = Joi.object({
+  project_id: Joi.number().integer().required(),
+});

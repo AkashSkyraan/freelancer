@@ -791,4 +791,127 @@
  */
 // #endregion
 
+// #region Add saved Projects
+/**
+ * @swagger
+ * /api/freelancer/addsaveproject:
+ *   post:
+ *     tags:
+ *       - Freelancer Profile
+ *     summary: Add saved projects
+ *     description: Add Saved projects.
+ *
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               project_id:
+ *                 type: number
+ *                 example: 1
+ *     responses:
+ *       200:
+ *         $ref: '#/components/responses/SuccessResponse'
+ *
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
+// #endregion
+
+// #region Unsave saved Projects
+/**
+ * @swagger
+ * /api/freelancer/unsaveproject:
+ *   post:
+ *     tags:
+ *       - Freelancer Profile
+ *     summary: Unsave saved projects
+ *     description: Unsave Saved projects.
+ *
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               project_id:
+ *                 type: number
+ *                 example: 1
+ *     responses:
+ *       200:
+ *         $ref: '#/components/responses/SuccessResponse'
+ *
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
+// #endregion
+
+// #region Get saved Projects
+/**
+ * @swagger
+ * /api/freelancer/getsavedproject:
+ *   post:
+ *     tags:
+ *       - Freelancer Profile
+ *     summary: Get saved projects
+ *     description: Get Saved projects.
+ *     responses:
+ *       200:
+ *         $ref: '#/components/responses/SuccessResponse'
+ *
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
+// #endregion
+
+// #region Add Recently visited Projects
+/**
+ * @swagger
+ * /api/freelancer/addrecentlyvisitprojects:
+ *   post:
+ *     tags:
+ *       - Freelancer Profile
+ *     summary: Add Recently visited Projects
+ *     description: Add Recently visited Projects.
+ *
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               project_id:
+ *                 type: number
+ *                 example: 1
+ *     responses:
+ *       200:
+ *         $ref: '#/components/responses/SuccessResponse'
+ *
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
+// #endregion
+
+// #region Get Recently visited Projects
+/**
+ * @swagger
+ * /api/freelancer/getrecentlyvisitprojects:
+ *   post:
+ *     tags:
+ *       - Freelancer Profile
+ *     summary: Get Recently visited Projects
+ *     description: Get Recently visited Projects.
+ *     responses:
+ *       200:
+ *         $ref: '#/components/responses/SuccessResponse'
+ *
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
+// #endregion
+
 export {};

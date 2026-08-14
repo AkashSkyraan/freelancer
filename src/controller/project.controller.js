@@ -10,9 +10,11 @@ import {
   deleteProjectSchema,
   getIndividualProjectSchema,
   updateProjectSchema,
+  updateProjectViewCountSchema,
   validateRequest,
 } from "../utils/validator.js";
 import { clientModel } from "../model/client-profile.model.js";
+import { pool } from "../config/db.js";
 
 const projectMdl = new projectModel();
 const clientMdl = new clientModel();
@@ -169,5 +171,62 @@ export const updateProject = async (req, res) => {
     }
   } catch (error) {
     return getServerError(res, error);
+  }
+};
+
+export const updateViewCount = async (req, res) => {
+  let connection;
+  try {
+    const validatedData = validateRequest(
+      updateProjectViewCountSchema,
+      req.body,
+      res,
+    );
+    const { id } = validatedData;
+    const user_id = req.user.user_id;
+
+    connection = await pool.getConnection();
+    await connection.beginTransaction();
+
+    const result = await projectMdl.updateProjectViewCount(
+      { user_id, id },
+      connection,
+    );
+    const update_result = await projectMdl.updateCount({ id }, connection);
+
+    if (result?.success === 1) {
+      if (connection) {
+        await connection.commit();
+      }
+      return sendResponse(
+        res,
+        200,
+        1,
+        "project view updated successfully",
+        [],
+        "",
+      );
+    } else if (result?.success === 0) {
+      if (connection) {
+        await connection.rollback();
+      }
+      return sendResponse(
+        res,
+        200,
+        0,
+        "Failed to update project count",
+        [],
+        "",
+      );
+    }
+  } catch (error) {
+    if (connection) {
+      await connection.rollback();
+    }
+    return getServerError(res, error);
+  } finally {
+    if (connection) {
+      connection.release();
+    }
   }
 };

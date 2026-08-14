@@ -171,4 +171,33 @@
  */
 // #endregion
 
+// #region Update project
+/**
+ * @swagger
+ * /api/project/updateviewcount:
+ *   post:
+ *     tags:
+ *       - Project
+ *     summary: Update project View count
+ *     description: Update project View count with required fields.
+ *
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               id:
+ *                 type: number
+ *                 example: 1
+ *     responses:
+ *       200:
+ *         $ref: '#/components/responses/SuccessResponse'
+ *
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
+// #endregion
+
 export {};
