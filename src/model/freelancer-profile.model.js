@@ -734,6 +734,7 @@ export class freelancerModel {
   p.price, p.open_position, p.project_status, p.views_count,
   p.address, p.city, p.state, p.country,
   p.country, p.zip_code, p.lat, p.lng, p.created_at,
+  cp.id AS client_id, cp.profile_pic, cp.company_name,
   
   GROUP_CONCAT(DISTINCT c.name) AS skills,
   e.value AS experience,
@@ -748,6 +749,8 @@ export class freelancerModel {
 
   LEFT JOIN dropdown_master pt ON pt.id = p.price_type
   AND pt.category = 'price_type'
+
+  LEFT JOIN client_profile cp ON cp.user_id = p.user_id
   
   WHERE 1 = 1`;
 
@@ -993,6 +996,57 @@ WHERE user_id = ?
 
     query = `SELECT project_id FROM recently_viewed_projects WHERE user_id = ? ORDER BY updated_at DESC`;
     params = [user_id];
+
+    const result = await executeQuery(query, params);
+
+    if (result?.success === 1) {
+      return {
+        success: 1,
+        data: result?.data,
+      };
+    } else if (result?.success === 0) {
+      return {
+        success: 0,
+        error: result?.error,
+      };
+    }
+  }
+
+  // ADD REPORT CLIENT
+  async addReportClient({ user_id, client_id, reason_id, reason }) {
+    let query;
+    let params;
+
+    query = `INSERT INTO user_reports (reporter_user_id, client_id, reason_id, reason) VALUES (?, ?, ?, ?)`;
+    params = [user_id, client_id, reason_id, reason?.trim() || null];
+
+    const result = await executeQuery(query, params);
+
+    if (result?.success === 1) {
+      return {
+        success: 1,
+        data: result?.data,
+      };
+    } else if (result?.success === 0) {
+      return {
+        success: 0,
+        error: result?.error,
+      };
+    }
+  }
+
+  // SEND INTEREST
+  async sendProjectInterest({
+    freelancer_id,
+    project_id,
+    initiated_by,
+    status,
+  }) {
+    let query;
+    let params;
+
+    query = `INSERT INTO project_connections (freelancer_id, project_id, initiated_by, status) VALUES (?, ?, ?, ?)`;
+    params = [freelancer_id, project_id, initiated_by, status];
 
     const result = await executeQuery(query, params);
 

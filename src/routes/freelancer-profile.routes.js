@@ -147,4 +147,18 @@ router.post(
   verifyRole(["FREELANCER"]),
   freelancercontroller.getRecentlyVisitedProject,
 );
+
+// REPORT CLIENT PROFILE
+router.post(
+  "/addreportclient",
+  verifyRole(["FREELANCER"]),
+  freelancercontroller.addReportClientProfile,
+);
+
+// SEND PROJECT INTEREST
+router.post(
+  "/sendprojectinterest",
+  verifyRole(["FREELANCER"]),
+  freelancercontroller.sendProjectInterest,
+);
 export default router;

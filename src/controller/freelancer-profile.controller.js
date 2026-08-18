@@ -17,7 +17,9 @@ import {
   createFreelancerWorkexpSchema,
   deleteFreelancerEducationSchema,
   deleteFreelancerWorkexpSchema,
+  ReportClientSchema,
   searchProjectSchema,
+  sendInterestSchema,
   updateCredentialSchema,
   updateFreelancerAddressSchema,
   updateFreelancerEducationSchema,
@@ -36,8 +38,10 @@ import { freelancerModel } from "../model/freelancer-profile.model.js";
 import bcrypt from "bcrypt";
 import { supportModel } from "../model/support.model.js";
 import { projectModel } from "../model/project.model.js";
+import { clientModel } from "../model/client-profile.model.js";
 const authMdl = new authModel();
 const freelancerMdl = new freelancerModel();
+const clientMdl = new clientModel();
 const supportMdl = new supportModel();
 const projectMdl = new projectModel();
 
@@ -1548,7 +1552,6 @@ export const searchProject = async (req, res) => {
       keyword,
       location,
     });
-    // console.log(result);
     const data = replaceNullWithEmptyString(result?.data);
 
     if (result?.success === 0) {
@@ -1817,6 +1820,90 @@ export const getRecentlyVisitedProject = async (req, res) => {
         [],
         "",
       );
+    }
+  } catch (error) {
+    return getServerError(res, error);
+  }
+};
+
+// REPORT CLIENT PROFILE
+export const addReportClientProfile = async (req, res) => {
+  try {
+    const validatedData = validateRequest(ReportClientSchema, req.body, res);
+    const { client_id, reason_id, reason } = validatedData;
+    const user_id = req.user.user_id;
+
+    const is_valid_client = await clientMdl.isValidClient({ client_id });
+    if (is_valid_client?.success === 0) {
+      return sendResponse(res, 200, 0, "Failed to report client", [], "");
+    }
+    if (is_valid_client?.data.length < 1) {
+      return sendResponse(res, 200, 0, "Invalid client", [], "");
+    }
+
+    const result = await freelancerMdl.addReportClient({
+      user_id,
+      client_id,
+      reason_id,
+      reason,
+    });
+
+    if (result?.success === 0) {
+      return sendResponse(res, 200, 0, "Failed to report", [], "");
+    } else if (result?.success === 1) {
+      return sendResponse(res, 200, 1, "Successfully reported", [], "");
+    }
+  } catch (error) {
+    return getServerError(res, error);
+  }
+};
+
+// SEND INTEREST
+export const sendProjectInterest = async (req, res) => {
+  try {
+    const validatedData = validateRequest(sendInterestSchema, req.body, res);
+    const { project_id } = validatedData;
+    const user_id = req.user.user_id;
+
+    const [is_project_id_valid, freelancer_id_result] = await Promise.all([
+      projectMdl.getSoloProject({
+        id: project_id,
+      }),
+      freelancerMdl.fetchFreelancerId({
+        user_id,
+      }),
+    ]);
+
+    if (is_project_id_valid?.success === 0) {
+      return sendResponse(res, 200, 0, "Failed to send interest", [], "");
+    }
+    if (is_project_id_valid?.data.length < 1) {
+      return sendResponse(res, 200, 0, "Invalid project id", [], "");
+    }
+
+    if (freelancer_id_result?.success === 0) {
+      return sendResponse(res, 200, 0, "Failed to send interest", [], "");
+    }
+    if (freelancer_id_result?.data.length < 1) {
+      return sendResponse(res, 200, 0, "Invalid freelancer id", [], "");
+    }
+
+    const freelancer_id = freelancer_id_result?.data[0]?.id;
+
+    const initiated_by = "FREELANCER";
+    const status = "pending";
+
+    const result = await freelancerMdl.sendProjectInterest({
+      freelancer_id,
+      project_id,
+      initiated_by,
+      status,
+    });
+
+    if (result?.success === 0) {
+      return sendResponse(res, 200, 0, "Failed to send interest", [], "");
+    } else if (result?.success === 1) {
+      return sendResponse(res, 200, 1, "Project sent successfully", [], "");
     }
   } catch (error) {
     return getServerError(res, error);

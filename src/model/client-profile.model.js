@@ -352,4 +352,25 @@ export class clientModel {
       };
     }
   }
+  async isValidClient({ client_id }) {
+    let query;
+    let params;
+
+    query = `SELECT id, name, profile_pic FROM client_profile WHERE id = ?`;
+    params = [client_id];
+
+    const result = await executeQuery(query, params);
+
+    if (result?.success === 1) {
+      return {
+        success: 1,
+        data: result?.data,
+      };
+    } else if (result?.success === 0) {
+      return {
+        success: 0,
+        error: result?.error,
+      };
+    }
+  }
 }

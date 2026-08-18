@@ -381,3 +381,11 @@ export const addSaveProjectSchema = Joi.object({
 export const addRecentlyVisitedProjectSchema = Joi.object({
   project_id: Joi.number().integer().required(),
 });
+export const ReportClientSchema = Joi.object({
+  client_id: Joi.number().integer().required(),
+  reason_id: Joi.number().integer().required().allow(null),
+  reason: Joi.string().required().allow(""),
+});
+export const sendInterestSchema = Joi.object({
+  project_id: Joi.number().integer().required(),
+});

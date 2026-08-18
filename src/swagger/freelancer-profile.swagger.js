@@ -914,4 +914,68 @@
  */
 // #endregion
 
+// #region Add report client
+/**
+ * @swagger
+ * /api/freelancer/addreportclient:
+ *   post:
+ *     tags:
+ *       - Freelancer Profile
+ *     summary: Add report client profile
+ *     description: Add report client profile.
+ *
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               client_id:
+ *                 type: number
+ *                 example: 2
+ *               reason_id:
+ *                 type: number
+ *                 example: 1
+ *               reason:
+ *                 type: number
+ *                 example: not original
+ *     responses:
+ *       200:
+ *         $ref: '#/components/responses/SuccessResponse'
+ *
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
+// #endregion
+
+// #region Add send project interest
+/**
+ * @swagger
+ * /api/freelancer/sendprojectinterest:
+ *   post:
+ *     tags:
+ *       - Freelancer Profile
+ *     summary: Add Send project interest
+ *     description: Add send project interest.
+ *
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               project_id:
+ *                 type: number
+ *                 example: 2
+ *     responses:
+ *       200:
+ *         $ref: '#/components/responses/SuccessResponse'
+ *
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
+// #endregion
+
 export {};
