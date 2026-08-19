@@ -1845,7 +1845,7 @@ export const addReportClientProfile = async (req, res) => {
       user_id,
       client_id,
       reason_id,
-      reason,
+      reason: reason?.trim() || null,
     });
 
     if (result?.success === 0) {

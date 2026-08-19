@@ -5,9 +5,12 @@ import {
   sendResponse,
 } from "../utils/helper.js";
 import {
+  addRecentlyVisitedFreelancerSchema,
+  addSaveFreelancerSchema,
   createCProfileSchema,
   createProjectSchema,
   deleteClientProfileSchema,
+  searchFreelancerSchema,
   updateCProfileSchema,
   updateCredentialSchema,
   updateFreelancerPreferenceSchema,
@@ -546,5 +549,350 @@ export const updateClientPreferences = async (req, res) => {
     }
   } catch (error) {
     return sendResponse(res, error);
+  }
+};
+
+// SAVED FREELACNERS
+export const addSaveFreelancer = async (req, res) => {
+  try {
+    const validatedData = validateRequest(
+      addSaveFreelancerSchema,
+      req.body,
+      res,
+    );
+    const { freelancer_id } = validatedData;
+    const user_id = req.user.user_id;
+
+    const check_saved_freelancer = await clientMdl.checkSavedFreelancer({
+      user_id,
+      freelancer_id,
+    });
+    if (check_saved_freelancer?.success === 0) {
+      return sendResponse(res, 200, 0, "Failed to save freelancer", [], "");
+    }
+
+    if (check_saved_freelancer?.data.length < 1) {
+      const result = await clientMdl.addSaveFreelancer({
+        user_id,
+        freelancer_id,
+      });
+      if (result?.success === 0) {
+        return sendResponse(res, 200, 0, "Failed to save freelancer", [], "");
+      } else if (result?.success === 1) {
+        return sendResponse(
+          res,
+          200,
+          1,
+          "Freelancer saved successfully",
+          [],
+          "",
+        );
+      }
+    }
+
+    if (check_saved_freelancer?.data.length > 0) {
+      const status = 1;
+      if (check_saved_freelancer?.data[0]?.status === 0) {
+        const result = await clientMdl.updateSavedFreelancer({
+          user_id,
+          freelancer_id,
+          status,
+        });
+        if (result?.success === 0) {
+          return sendResponse(res, 200, 0, "Failed to save freelancer", [], "");
+        } else if (result?.success === 1) {
+          return sendResponse(
+            res,
+            200,
+            1,
+            "Freelancer saved successfully",
+            [],
+            "",
+          );
+        }
+      } else {
+        return sendResponse(
+          res,
+          200,
+          0,
+          "Failed to save or already saved",
+          [],
+          "",
+        );
+      }
+    }
+  } catch (error) {
+    return getServerError(res, error);
+  }
+};
+
+export const unsaveFreelancer = async (req, res) => {
+  try {
+    const validatedData = validateRequest(
+      addSaveFreelancerSchema,
+      req.body,
+      res,
+    );
+    const { freelancer_id } = validatedData;
+    const user_id = req.user.user_id;
+    const status = 0;
+
+    const unSaveResult = await clientMdl.updateSavedFreelancer({
+      user_id,
+      freelancer_id,
+      status,
+    });
+    if (unSaveResult?.success === 0) {
+      return sendResponse(res, 200, 0, "Failed to unsave freelancer", [], "");
+    } else if (unSaveResult?.success === 1) {
+      return sendResponse(
+        res,
+        200,
+        1,
+        "unsaved freelancer successfully",
+        [],
+        "",
+      );
+    }
+  } catch (error) {
+    return getServerError(res, error);
+  }
+};
+
+export const getSavedFreelancer = async (req, res) => {
+  try {
+    const user_id = req.user.user_id;
+
+    const result = await clientMdl.getSavedFreelancer({ user_id });
+    if (result?.success === 0) {
+      return sendResponse(
+        res,
+        200,
+        0,
+        "Failed to fetch saved freelancers",
+        [],
+        "",
+      );
+    }
+    const data = replaceNullWithEmptyString(result?.data);
+
+    if (result?.success === 1) {
+      return sendResponse(
+        res,
+        200,
+        1,
+        "Fetched saved freelancers successfully",
+        data,
+        "",
+      );
+    }
+  } catch (error) {
+    return getServerError(res, error);
+  }
+};
+
+// RECENTLY VISITED FREELANCERS
+export const addRecentlyVisitedFreelancers = async (req, res) => {
+  let connection;
+  try {
+    const validatedData = validateRequest(
+      addRecentlyVisitedFreelancerSchema,
+      req.body,
+      res,
+    );
+    const { freelancer_id } = validatedData;
+    const user_id = req.user.user_id;
+
+    const is_already_visit = await clientMdl.fetchRecentlyVisitedFreelancers({
+      user_id,
+      freelancer_id,
+    });
+    // console.log(is_already_visit);
+    if (is_already_visit?.success === 0) {
+      return sendResponse(
+        res,
+        200,
+        0,
+        "Failed to add recently visited freelancers",
+        [],
+        "",
+      );
+    }
+
+    connection = await pool.getConnection();
+    await connection.beginTransaction();
+
+    if (is_already_visit?.data.length < 1) {
+      const result = await clientMdl.addRecentlyVisitedFreelancers(
+        {
+          user_id,
+          freelancer_id,
+        },
+        connection,
+      );
+      const delete_result = await clientMdl.delete_recently_visited_freelancers(
+        { user_id, freelancer_id },
+        connection,
+      );
+
+      if (result?.success === 0 || delete_result?.success === 0) {
+        if (connection) {
+          await connection.rollback();
+        }
+        return sendResponse(
+          res,
+          200,
+          0,
+          "Failed to add recently visited freelancers",
+          [],
+          "",
+        );
+      } else if (result?.success === 1 && delete_result?.success === 1) {
+        if (connection) {
+          await connection.commit();
+        }
+        return sendResponse(
+          res,
+          200,
+          1,
+          "Recently visited freelancers added successfully",
+          [],
+          "",
+        );
+      }
+    }
+
+    if (is_already_visit?.data.length > 0) {
+      const result = await clientMdl.updateRecentlyVisitedFreelancers({
+        user_id,
+        freelancer_id,
+      });
+      if (result?.success === 0) {
+        return sendResponse(
+          res,
+          200,
+          0,
+          "Failed to add recently visited freelancers",
+          [],
+          "",
+        );
+      } else if (result?.success === 1) {
+        return sendResponse(
+          res,
+          200,
+          1,
+          "Recently visited freelancers added successfully",
+          [],
+          "",
+        );
+      }
+    }
+  } catch (error) {
+    if (connection) {
+      await connection.rollback();
+    }
+    return getServerError(res, error);
+  } finally {
+    if (connection) {
+      connection.release();
+    }
+  }
+};
+export const getRecentlyVisitedFreelancers = async (req, res) => {
+  try {
+    const user_id = req.user.user_id;
+
+    const result = await clientMdl.getRecentlyViewedFreelancer({ user_id });
+    if (result?.success === 0) {
+      return sendResponse(
+        res,
+        200,
+        0,
+        "Failed to fetch recently visited freelancers",
+        [],
+        "",
+      );
+    }
+
+    const data = replaceNullWithEmptyString(result?.data);
+
+    if (result?.success === 1) {
+      return sendResponse(
+        res,
+        200,
+        1,
+        "Recently visited freelancers fetched successfully",
+        data,
+        "",
+      );
+    }
+  } catch (error) {
+    return getServerError(res, error);
+  }
+};
+
+// SEARCH FREELANCER
+export const searchFreelancer = async (req, res) => {
+  try {
+    const validatedData = validateRequest(
+      searchFreelancerSchema,
+      req.body,
+      res,
+    );
+    const { categories, experience, rating, keyword, location } = validatedData;
+    const user_id = req.user.user_id;
+
+    if (keyword) {
+      const recent_search = await supportMdl.addRecentSearch({
+        user_id,
+        keyword,
+      });
+      const [delete_search, trend_search] = await Promise.all([
+        supportMdl.delete_recent_search({
+          user_id,
+          keyword,
+        }),
+        supportMdl.addTrendingSearch({ user_id, keyword }),
+      ]);
+    }
+    if (location) {
+      const recent_location = await supportMdl.addRecentSearch({
+        user_id,
+        location,
+      });
+      const [delete_search, trend_search] = await Promise.all([
+        supportMdl.delete_recent_search({
+          user_id,
+          location,
+        }),
+        supportMdl.addTrendingSearch({ user_id, location }),
+      ]);
+    }
+
+    const result = await clientMdl.searchFreelancers({
+      categories,
+      experience,
+      rating,
+      keyword,
+      location,
+    });
+    if (result?.success === 0) {
+      return sendResponse(res, 200, 0, "Failed to fetch freelancers", [], "");
+    }
+
+    const data = replaceNullWithEmptyString(result?.data);
+
+    if (result?.success === 1) {
+      return sendResponse(
+        res,
+        200,
+        1,
+        "Freelancers fetched successfully",
+        data,
+        "",
+      );
+    }
+  } catch (error) {
+    return getServerError(res, error);
   }
 };

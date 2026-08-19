@@ -290,4 +290,174 @@
  */
 // #endregion
 
+// #region Add save freelancer
+/**
+ * @swagger
+ * /api/client/addsavefreelancer:
+ *   post:
+ *     tags:
+ *       - Client Profile
+ *     summary: Save freelancer
+ *     description: Save freelancer with required fields.
+ *
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               freelancer_id:
+ *                 type: number
+ *                 example: 2
+ *     responses:
+ *       200:
+ *         $ref: '#/components/responses/SuccessResponse'
+ *
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
+// #endregion
+
+// #region update Unsave freelancer
+/**
+ * @swagger
+ * /api/client/unsavefreelancer:
+ *   post:
+ *     tags:
+ *       - Client Profile
+ *     summary: UnSave freelancer
+ *     description: UnSave freelancer with required fields.
+ *
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               freelancer_id:
+ *                 type: number
+ *                 example: 2
+ *     responses:
+ *       200:
+ *         $ref: '#/components/responses/SuccessResponse'
+ *
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
+// #endregion
+
+// #region Get saved freelancers
+/**
+ * @swagger
+ * /api/client/getsavedfreelancer:
+ *   post:
+ *     tags:
+ *       - Client Profile
+ *     summary: Get saved freelancer
+ *     description: Get saved freelancer with required fields.
+ *     responses:
+ *       200:
+ *         $ref: '#/components/responses/SuccessResponse'
+ *
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
+// #endregion
+
+// #region Add recently visited freelancer
+/**
+ * @swagger
+ * /api/client/addrecentlyvisitfreelancer:
+ *   post:
+ *     tags:
+ *       - Client Profile
+ *     summary: Add recently visited freelancer
+ *     description: Add recently visited freelancer with required fields.
+ *
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               freelancer_id:
+ *                 type: number
+ *                 example: 2
+ *     responses:
+ *       200:
+ *         $ref: '#/components/responses/SuccessResponse'
+ *
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
+// #endregion
+
+// #region Get recently visited freelancers
+/**
+ * @swagger
+ * /api/client/getrecentlyvisitfreelancer:
+ *   post:
+ *     tags:
+ *       - Client Profile
+ *     summary: Get recently visited freelancer
+ *     description: Get recently visited freelancer.
+ *     responses:
+ *       200:
+ *         $ref: '#/components/responses/SuccessResponse'
+ *
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
+// #endregion
+
+// #region Search Project
+/**
+ * @swagger
+ * /api/client/searchfreelancer:
+ *   post:
+ *     tags:
+ *       - Client Profile
+ *     summary: Search freelancer
+ *     description: Search freelancer.
+ *
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               categories:
+ *                 type: array
+ *                 items:
+ *                  type: integer
+ *                 example: [1,2,3,4]
+ *               experience:
+ *                 type: array
+ *                 items:
+ *                  type: integer
+ *                 example: [1,2,3,4]
+ *               rating:
+ *                 type: array
+ *                 items:
+ *                  type: integer
+ *                 example: [5,4]
+ *               keyword:
+ *                 type: string
+ *                 example: react
+ *               location:
+ *                 type: string
+ *                 example: coimbatore
+ *     responses:
+ *       200:
+ *         $ref: '#/components/responses/SuccessResponse'
+ *
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
+// #endregion
+
 export {};

@@ -1018,7 +1018,7 @@ WHERE user_id = ?
     let params;
 
     query = `INSERT INTO user_reports (reporter_user_id, client_id, reason_id, reason) VALUES (?, ?, ?, ?)`;
-    params = [user_id, client_id, reason_id, reason?.trim() || null];
+    params = [user_id, client_id, reason_id, reason];
 
     const result = await executeQuery(query, params);
 

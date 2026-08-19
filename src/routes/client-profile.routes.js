@@ -38,4 +38,39 @@ router.post(
   clientcontroller.updateClientPreferences,
 );
 
+// SAVED FREELANCER
+router.post(
+  "/addsavefreelancer",
+  verifyRole(["CLIENT"]),
+  clientcontroller.addSaveFreelancer,
+);
+router.post(
+  "/unsavefreelancer",
+  verifyRole(["CLIENT"]),
+  clientcontroller.unsaveFreelancer,
+);
+router.post(
+  "/getsavedfreelancer",
+  verifyRole(["CLIENT"]),
+  clientcontroller.getSavedFreelancer,
+);
+
+// RECENTLY VISITED FREELANCERS
+router.post(
+  "/addrecentlyvisitfreelancer",
+  verifyRole(["CLIENT"]),
+  clientcontroller.addRecentlyVisitedFreelancers,
+);
+router.post(
+  "/getrecentlyvisitfreelancer",
+  verifyRole(["CLIENT"]),
+  clientcontroller.getRecentlyVisitedFreelancers,
+);
+
+// SEARCH FREELANCER
+router.post(
+  "/searchfreelancer",
+  verifyRole(["CLIENT"]),
+  clientcontroller.searchFreelancer,
+);
 export default router;

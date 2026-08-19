@@ -309,6 +309,307 @@ export class clientModel {
     }
   }
 
+  //SAVED FREELACNER
+  async checkSavedFreelancer({ user_id, freelancer_id }) {
+    let query;
+    let params;
+
+    query = `SELECT id, freelancer_id, status FROM saved_freelancers WHERE user_id = ? AND freelancer_id = ?`;
+    params = [user_id, freelancer_id];
+
+    const result = await executeQuery(query, params);
+
+    if (result?.success === 1) {
+      return {
+        success: 1,
+        data: result?.data,
+      };
+    } else if (result?.success === 0) {
+      return {
+        success: 0,
+        error: result?.error,
+      };
+    }
+  }
+  async addSaveFreelancer({ user_id, freelancer_id }) {
+    let query;
+    let params;
+
+    query = `INSERT INTO saved_freelancers (user_id, freelancer_id) VALUES (?, ?)`;
+    params = [user_id, freelancer_id];
+
+    const result = await executeQuery(query, params);
+
+    if (result?.success === 1) {
+      return {
+        success: 1,
+        data: result?.data,
+      };
+    } else if (result?.success === 0) {
+      return {
+        success: 0,
+        error: result?.error,
+      };
+    }
+  }
+  async updateSavedFreelancer({ user_id, freelancer_id, status }) {
+    let query;
+    let params;
+
+    query = `UPDATE saved_freelancers SET status = ? WHERE user_id = ? AND freelancer_id = ?`;
+    params = [status, user_id, freelancer_id];
+
+    const result = await executeQuery(query, params);
+
+    if (result?.success === 1) {
+      return {
+        success: 1,
+        data: result?.data,
+      };
+    } else if (result?.success === 0) {
+      return {
+        success: 0,
+        error: result?.error,
+      };
+    }
+  }
+  async getSavedFreelancer({ user_id }) {
+    let query;
+    let params;
+
+    query = `SELECT sf.id,
+    
+    fp.id AS freelancer_profile_id, fp.name, fp.profile_pic, fp.city, fp.state, fp.country,
+    fp.about,
+
+    dm.value AS position
+      
+    FROM saved_freelancers sf 
+
+    LEFT JOIN freelancer_profile fp ON fp.id = sf.freelancer_id
+
+    LEFT JOIN freelancer_positions fpo ON fpo.freelancer_profile_id = sf.freelancer_id
+
+    LEFT JOIN dropdown_master dm ON dm.id = fpo.position_id
+    
+    WHERE sf.user_id = ? and sf.status = ?`;
+    params = [user_id, 1];
+
+    const result = await executeQuery(query, params);
+
+    if (result?.success === 1) {
+      return {
+        success: 1,
+        data: result?.data,
+      };
+    } else if (result?.success === 0) {
+      return {
+        success: 0,
+        error: result?.error,
+      };
+    }
+  }
+
+  // RECENTLY VISITED FREELANCERS
+  async fetchRecentlyVisitedFreelancers({ user_id, freelancer_id }) {
+    let query;
+    let params;
+
+    query = `SELECT id FROM recently_viewed_freelancers WHERE user_id = ? AND freelancer_id = ?`;
+    params = [user_id, freelancer_id];
+
+    const result = await executeQuery(query, params);
+
+    if (result?.success === 1) {
+      return {
+        success: 1,
+        data: result?.data,
+      };
+    } else if (result?.success === 0) {
+      return {
+        success: 0,
+        error: result?.error,
+      };
+    }
+  }
+  async delete_recently_visited_freelancers(
+    { user_id, freelancer_id },
+    connection = null,
+  ) {
+    let query;
+    let params;
+
+    query = `DELETE FROM recently_viewed_freelancers
+WHERE user_id = ?
+  AND id NOT IN (
+      SELECT id
+      FROM (
+          SELECT id
+          FROM recently_viewed_freelancers
+          WHERE user_id = ?
+          ORDER BY updated_at DESC
+          LIMIT 5
+      ) AS latest)`;
+    params = [user_id, user_id];
+
+    const result = await executeQuery(query, params, connection);
+
+    if (result?.success === 1) {
+      return {
+        success: 1,
+        data: result?.data,
+      };
+    } else if (result?.success === 0) {
+      return {
+        success: 0,
+        error: result?.error,
+      };
+    }
+  }
+  async addRecentlyVisitedFreelancers(
+    { user_id, freelancer_id },
+    connection = null,
+  ) {
+    let query;
+    let params;
+
+    query = `INSERT INTO recently_viewed_freelancers (user_id, freelancer_id) VALUES (?, ?)`;
+    params = [user_id, freelancer_id];
+
+    const result = await executeQuery(query, params, connection);
+
+    if (result?.success === 1) {
+      return {
+        success: 1,
+        data: result?.data,
+      };
+    } else if (result?.success === 0) {
+      return {
+        success: 0,
+        error: result?.error,
+      };
+    }
+  }
+  async updateRecentlyVisitedFreelancers({ user_id, freelancer_id }) {
+    let query;
+    let params;
+
+    query = `UPDATE recently_viewed_freelancers SET updated_at = NOW() WHERE user_id = ? AND freelancer_id = ?`;
+    params = [user_id, freelancer_id];
+
+    const result = await executeQuery(query, params);
+
+    if (result?.success === 1) {
+      return {
+        success: 1,
+        data: result?.data,
+      };
+    } else if (result?.success === 0) {
+      return {
+        success: 0,
+        error: result?.error,
+      };
+    }
+  }
+  async getRecentlyViewedFreelancer({ user_id }) {
+    let query;
+    let params;
+
+    query = `SELECT rvf.id,
+    
+    fp.id AS freelancer_profile_id, fp.name, fp.profile_pic, fp.city, fp.state, fp.country,
+    fp.about,
+
+    dm.value AS position
+      
+    FROM recently_viewed_freelancers rvf
+
+    LEFT JOIN freelancer_profile fp ON fp.id = rvf.freelancer_id
+
+    LEFT JOIN freelancer_positions fpo ON fpo.freelancer_profile_id = rvf.freelancer_id
+
+    LEFT JOIN dropdown_master dm ON dm.id = fpo.position_id
+    
+    WHERE rvf.user_id = ? ORDER BY rvf.updated_at DESC`;
+
+    params = [user_id];
+
+    const result = await executeQuery(query, params);
+
+    if (result?.success === 1) {
+      return {
+        success: 1,
+        data: result?.data,
+      };
+    } else if (result?.success === 0) {
+      return {
+        success: 0,
+        error: result?.error,
+      };
+    }
+  }
+
+  // SEARCH FREELANCERS
+  async searchFreelancers({
+    categories,
+    experience,
+    rating,
+    keyword,
+    location,
+  }) {
+    let query;
+    let params;
+
+    query = `SELECT 
+    fp.id, fp.name, fp.profile_pic, fp.cover_pic, fp.city, fp.state,
+
+    dm.value AS position,
+    GROUP_CONCAT(s.value) AS skills,
+
+    COUNT(DISTINCT CASE
+    WHEN pc.status IN (?, ?, ?, ?)
+    THEN pc.id
+    END) AS total_jobs,
+
+    COUNT(DISTINCT CASE
+    WHEN pc.status = ?
+    THEN pc.id
+    END) AS completed_jobs
+    
+    FROM freelancer_profile fp
+
+    LEFT JOIN freelancer_positions fpo ON fpo.freelancer_profile_id = fp.id
+
+    LEFT JOIN dropdown_master dm ON dm.id = fpo.position_id
+    AND dm.category = 'positions'
+
+    LEFT JOIN freelancer_skills fs ON fs.freelancer_profile_id = fp.id
+
+    LEFT JOIN skills s ON s.id = fs.skill_id
+
+    LEFT JOIN project_connections pc ON pc.freelancer_id = fp.id
+    
+    WHERE 1 = 1 
+    
+    GROUP BY fp.id`;
+
+    params = ["accepted", "inprogress", "completed", "removed", "completed"];
+
+    const result = await executeQuery(query, params);
+
+    if (result?.success === 1) {
+      return {
+        success: 1,
+        data: result?.data,
+      };
+    } else if (result?.success === 0) {
+      return {
+        success: 0,
+        error: result?.error,
+      };
+    }
+  }
+
   // SUPPORT QUERIES
   async fetchClientId({ user_id }) {
     let query;

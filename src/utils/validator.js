@@ -22,6 +22,20 @@ export const validateRequest = (schema, data, res) => {
   }
   return value;
 };
+const monthNames = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+];
 
 // AUTHENTICATION
 export const requestOtpSchema = Joi.object({
@@ -308,17 +322,25 @@ export const updateFreelancerPreferenceSchema = Joi.object({
 // FREELANCER PROFILE EDUCATION
 export const createFreelancerEducationSchema = Joi.object({
   course: Joi.string().required(),
-  start_month: Joi.number().required(),
+  start_month: Joi.string()
+    .required()
+    .valid(...monthNames),
   start_year: Joi.number().required(),
-  end_month: Joi.number().required(),
+  end_month: Joi.string()
+    .required()
+    .valid(...monthNames),
   end_year: Joi.number().required(),
 });
 export const updateFreelancerEducationSchema = Joi.object({
   id: Joi.number().required(),
   course: Joi.string().required(),
-  start_month: Joi.number().required(),
+  start_month: Joi.number()
+    .required()
+    .valid(...monthNames),
   start_year: Joi.number().required(),
-  end_month: Joi.number().required(),
+  end_month: Joi.number()
+    .required()
+    .valid(...monthNames),
   end_year: Joi.number().required(),
 });
 export const deleteFreelancerEducationSchema = Joi.object({
@@ -375,17 +397,37 @@ export const deleterecentSearchSchema = Joi.object({
 export const updateProjectViewCountSchema = Joi.object({
   id: Joi.number().integer().required(),
 });
+// SAVED PROJECT
 export const addSaveProjectSchema = Joi.object({
   project_id: Joi.number().integer().required(),
 });
+// RECENTLY VISITED PROJECT
 export const addRecentlyVisitedProjectSchema = Joi.object({
   project_id: Joi.number().integer().required(),
 });
+// REPORT CLIENT
 export const ReportClientSchema = Joi.object({
   client_id: Joi.number().integer().required(),
   reason_id: Joi.number().integer().required().allow(null),
   reason: Joi.string().required().allow(""),
 });
+// SEND PROJECT INTEREST
 export const sendInterestSchema = Joi.object({
   project_id: Joi.number().integer().required(),
+});
+// SAVED FREELANCER
+export const addSaveFreelancerSchema = Joi.object({
+  freelancer_id: Joi.number().integer().required(),
+});
+export const addRecentlyVisitedFreelancerSchema = Joi.object({
+  freelancer_id: Joi.number().integer().required(),
+});
+
+// SEARCH FREELANCER
+export const searchFreelancerSchema = Joi.object({
+  categories: Joi.array().items(Joi.number().integer()).unique().required(),
+  experience: Joi.array().items(Joi.number().integer()).unique().required(),
+  rating: Joi.array().items(Joi.number().integer()).unique().required(),
+  keyword: Joi.string().required().allow(""),
+  location: Joi.string().required().allow(""),
 });
