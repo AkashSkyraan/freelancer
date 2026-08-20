@@ -197,28 +197,22 @@ export class projectModel {
     const placeholders = project_ids.map(() => "?").join(", ");
 
     query = `SELECT
-  id,
-  title,
-  descp,
-  skills,
-  talent_role,
-  duration,
-  duration_type,
-  experience,
-  price,
-  price_type,
-  open_position,
-  project_status,
-  views_count,
-  address,
-  city,
-  state,
-  country,
-  zip_code,
-  lat,
-  lng,
-  created_at
-  FROM projects WHERE id IN (${placeholders}) ORDER BY FIELD(id, ${placeholders})`;
+  p.id, p.title, p.descp, p.skills, p.talent_role, p.duration, p.duration_type,
+  p.experience, p.price, p.price_type, p.open_position, p.project_status,
+  p.views_count, p.address, p.city, p.state, p.country, p.zip_code,
+  p.lat, p.lng, p.created_at,
+
+  CASE
+  WHEN p.id IN (sp.project_id)
+  THEN 1
+  ELSE 0
+  END AS is_saved
+
+  FROM projects p
+
+  LEFT JOIN saved_projects sp ON sp.project_id = p.id
+
+  WHERE p.id IN (${placeholders}) ORDER BY FIELD(p.id, ${placeholders})`;
     params = [...project_ids, ...project_ids];
 
     const result = await executeQuery(query, params);

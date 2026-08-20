@@ -10,6 +10,9 @@ import {
   createCProfileSchema,
   createProjectSchema,
   deleteClientProfileSchema,
+  getViewFreelancerProfileSchema,
+  inviteToProjectSchema,
+  rateFreelancerSchema,
   searchFreelancerSchema,
   updateCProfileSchema,
   updateCredentialSchema,
@@ -22,10 +25,14 @@ import { authModel } from "../model/auth.model.js";
 import { pool } from "../config/db.js";
 import bcrypt from "bcrypt";
 import { supportModel } from "../model/support.model.js";
+import { projectModel } from "../model/project.model.js";
+import { freelancerModel } from "../model/freelancer-profile.model.js";
 
 const clientMdl = new clientModel();
 const authMdl = new authModel();
 const supportMdl = new supportModel();
+const projectMdl = new projectModel();
+const freelancerMdl = new freelancerModel();
 
 export const createClientProfile = async (req, res) => {
   let connection;
@@ -870,6 +877,7 @@ export const searchFreelancer = async (req, res) => {
     }
 
     const result = await clientMdl.searchFreelancers({
+      user_id,
       categories,
       experience,
       rating,
@@ -889,6 +897,289 @@ export const searchFreelancer = async (req, res) => {
         1,
         "Freelancers fetched successfully",
         data,
+        "",
+      );
+    }
+  } catch (error) {
+    return getServerError(res, error);
+  }
+};
+
+// RATE AND REVIEW FREELANCER -> rating and also update in freelancer profile avg_rating
+export const addRateFreelancer = async (req, res) => {
+  let connection;
+  try {
+    const validatedData = validateRequest(rateFreelancerSchema, req.body, res);
+    const { freelancer_id, project_id, rating, review } = validatedData;
+    const user_id = req.user.user_id;
+
+    const fetch_client_result = await clientMdl.fetchClientId({ user_id });
+    if (fetch_client_result?.success === 0) {
+      return sendResponse(res, 200, 0, "Failed to rate freelancer", [], "");
+    }
+
+    const client_id = fetch_client_result?.data[0]?.id;
+
+    connection = await pool.getConnection();
+    await connection.beginTransaction();
+
+    const result = await clientMdl.addRateFreelancer(
+      {
+        client_id,
+        freelancer_id,
+        project_id,
+        rating,
+        review,
+      },
+      connection,
+    );
+    if (result?.success === 0) {
+      if (connection) {
+        await connection.rollback();
+      }
+      return sendResponse(
+        res,
+        200,
+        0,
+        "Failed to add freelancer ratings",
+        [],
+        "",
+      );
+    }
+
+    const fetch_result = await clientMdl.fetchAverageRatings(
+      { freelancer_id },
+      connection,
+    );
+    if (fetch_result?.success === 0) {
+      if (connection) {
+        await connection.rollback();
+      }
+      return sendResponse(
+        res,
+        200,
+        0,
+        "Failed to add freelancer ratings",
+        [],
+        "",
+      );
+    }
+
+    const average_ratings = fetch_result?.data[0]?.average_ratings;
+    const total_ratings = fetch_result?.data[0]?.total_ratings;
+    const update_result = await clientMdl.updateAverageRatings(
+      {
+        freelancer_id,
+        average_ratings,
+        total_ratings,
+      },
+      connection,
+    );
+    if (update_result?.success === 0) {
+      if (connection) {
+        await connection.rollback();
+      }
+      return sendResponse(
+        res,
+        200,
+        0,
+        "Failed to add freelancer ratings",
+        [],
+        "",
+      );
+    }
+
+    if (
+      result?.success === 1 &&
+      fetch_result?.success === 1 &&
+      update_result?.success === 1
+    ) {
+      if (connection) {
+        await connection.commit();
+      }
+      return sendResponse(res, 200, 1, "Rated freelancer successfully", [], "");
+    }
+  } catch (error) {
+    if (connection) {
+      await connection.rollback();
+    }
+    return getServerError(res, error);
+  } finally {
+    if (connection) {
+      connection.release();
+    }
+  }
+};
+
+// GET MY PROJECTS
+export const getMyProjects = async (req, res) => {
+  try {
+    const user_id = req.user.user_id;
+
+    const fetch_project_id = await clientMdl.getMyProjects({ user_id });
+
+    if (fetch_project_id?.success === 0) {
+      return sendResponse(res, 200, 0, "Failed to fetch my projects", [], "");
+    }
+    const project_ids = fetch_project_id?.data.map((row) => row.id);
+
+    const result = await projectMdl.getProjects({ project_ids });
+    if (result?.success === 0) {
+      return sendResponse(res, 200, 0, "Failed to fetch my projects", [], "");
+    }
+
+    const data = replaceNullWithEmptyString(result?.data);
+    if (result?.success === 1) {
+      return sendResponse(
+        res,
+        200,
+        1,
+        "My projects fetched successfully",
+        data,
+        "",
+      );
+    }
+  } catch (error) {
+    return getServerError(res, error);
+  }
+};
+
+// INVITE TO PROJECTS
+export const inviteToProjects = async (req, res) => {
+  try {
+    const validatedData = validateRequest(inviteToProjectSchema, req.body, res);
+    const { project_id, freelancer_id } = validatedData;
+
+    let result;
+    for (const id of project_id) {
+      result = await clientMdl.inviteToProjects({
+        project_id: id,
+        freelancer_id,
+      });
+      if (result?.success === 0) {
+        return sendResponse(
+          res,
+          200,
+          0,
+          "Failed to send project invite",
+          [],
+          "",
+        );
+      }
+    }
+    if (result?.success === 1) {
+      return sendResponse(
+        res,
+        200,
+        1,
+        "Project invite sent successfully",
+        [],
+        "",
+      );
+    }
+  } catch (error) {
+    return getServerError(res, error);
+  }
+};
+
+// VIEW FREELANCER PROFILE
+export const getViewFreelancerProfile = async (req, res) => {
+  try {
+    const validatedData = validateRequest(
+      getViewFreelancerProfileSchema,
+      req.body,
+      res,
+    );
+    const { freelancer_id } = validatedData;
+
+    const [
+      profile,
+      languages,
+      educations,
+      positions,
+      services,
+      skills,
+      work_exps,
+    ] = await Promise.all([
+      freelancerMdl.getProfile({ freelancer_id }),
+      freelancerMdl.getLanguages({ freelancer_id }),
+      freelancerMdl.getEducations({ freelancer_id }),
+      freelancerMdl.getPositions({ freelancer_id }),
+      freelancerMdl.getServices({ freelancer_id }),
+      freelancerMdl.getSkills({ freelancer_id }),
+      freelancerMdl.getWork_exps({ freelancer_id }),
+    ]);
+
+    const [ratings, completed_projects, feedbacks] = await Promise.all([
+      freelancerMdl.getMyRatings({ freelancer_id }),
+      freelancerMdl.getCompletedProjects({ freelancer_id }),
+      freelancerMdl.getMyFeedbacks({ freelancer_id }),
+    ]);
+
+    if (
+      profile?.success === 0 ||
+      languages?.success === 0 ||
+      educations?.success === 0 ||
+      positions?.success === 0 ||
+      services?.success === 0 ||
+      skills?.success === 0 ||
+      work_exps?.success === 0 ||
+      ratings?.success === 0 ||
+      feedbacks?.success === 0 ||
+      completed_projects?.success === 0
+    ) {
+      return sendResponse(
+        res,
+        200,
+        0,
+        "Failed to fetch freelancer profile",
+        [],
+        "",
+      );
+    }
+
+    const profile_data = profile?.data;
+    const languages_data = languages?.data;
+    const educations_data = educations?.data;
+    const positions_data = positions?.data;
+    const services_data = services?.data;
+    const skills_data = skills?.data;
+    const work_exps_data = work_exps?.data;
+    const ratings_data = ratings?.data;
+    const feedbacks_data = feedbacks?.data;
+    const completed_projects_data = completed_projects?.data;
+
+    const data = {
+      profile: profile_data,
+      languages: languages_data,
+      educations: educations_data,
+      positions: positions_data,
+      services: services_data,
+      skills: skills_data,
+      work_exps: work_exps_data,
+      ratings: ratings_data,
+      feedbacks: feedbacks_data,
+      completed_projects: completed_projects_data,
+    };
+    const final_response = replaceNullWithEmptyString(data);
+    if (
+      profile?.success === 1 &&
+      languages?.success === 1 &&
+      educations?.success === 1 &&
+      positions?.success === 1 &&
+      services?.success === 1 &&
+      skills?.success === 1 &&
+      work_exps?.success === 1 &&
+      ratings?.success === 1 &&
+      feedbacks?.success === 1 &&
+      completed_projects?.success === 1
+    ) {
+      return sendResponse(
+        res,
+        200,
+        1,
+        "Freelancer profile fetched successfully",
+        [final_response],
         "",
       );
     }

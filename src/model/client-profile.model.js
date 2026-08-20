@@ -520,7 +520,13 @@ WHERE user_id = ?
     fp.id AS freelancer_profile_id, fp.name, fp.profile_pic, fp.city, fp.state, fp.country,
     fp.about,
 
-    dm.value AS position
+    dm.value AS position,
+
+    CASE
+    WHEN rvf.freelancer_id IN (sf.freelancer_id)
+    THEN 1
+    ELSE 0
+    END AS is_saved
       
     FROM recently_viewed_freelancers rvf
 
@@ -529,10 +535,13 @@ WHERE user_id = ?
     LEFT JOIN freelancer_positions fpo ON fpo.freelancer_profile_id = rvf.freelancer_id
 
     LEFT JOIN dropdown_master dm ON dm.id = fpo.position_id
+
+    LEFT JOIN saved_freelancers sf ON sf.freelancer_id = rvf.freelancer_id
+    AND sf.user_id = ?
     
     WHERE rvf.user_id = ? ORDER BY rvf.updated_at DESC`;
 
-    params = [user_id];
+    params = [user_id, user_id];
 
     const result = await executeQuery(query, params);
 
@@ -551,6 +560,7 @@ WHERE user_id = ?
 
   // SEARCH FREELANCERS
   async searchFreelancers({
+    user_id,
     categories,
     experience,
     rating,
@@ -561,10 +571,10 @@ WHERE user_id = ?
     let params;
 
     query = `SELECT 
-    fp.id, fp.name, fp.profile_pic, fp.cover_pic, fp.city, fp.state,
+    fp.id, fp.name, fp.profile_pic, fp.cover_pic, fp.city, fp.state, fp.avg_ratings, fp.total_ratings,
 
     dm.value AS position,
-    GROUP_CONCAT(s.value) AS skills,
+    GROUP_CONCAT(DISTINCT s.value) AS skills,
 
     COUNT(DISTINCT CASE
     WHEN pc.status IN (?, ?, ?, ?)
@@ -574,7 +584,13 @@ WHERE user_id = ?
     COUNT(DISTINCT CASE
     WHEN pc.status = ?
     THEN pc.id
-    END) AS completed_jobs
+    END) AS completed_jobs,
+
+    CASE
+    WHEN sf.id IS NOT NULL AND sf.status = 1
+    THEN 1
+    ELSE 0
+    END AS is_saved
     
     FROM freelancer_profile fp
 
@@ -588,12 +604,162 @@ WHERE user_id = ?
     LEFT JOIN skills s ON s.id = fs.skill_id
 
     LEFT JOIN project_connections pc ON pc.freelancer_id = fp.id
-    
-    WHERE 1 = 1 
-    
-    GROUP BY fp.id`;
 
-    params = ["accepted", "inprogress", "completed", "removed", "completed"];
+    LEFT JOIN saved_freelancers sf ON sf.freelancer_id = fp.id
+    AND sf.user_id = ?
+
+    LEFT JOIN freelancer_service_categories fsc ON fsc.freelancer_profile_id = fp.id
+
+    LEFT JOIN categories c ON c.id = fsc.service_id
+    
+    WHERE 1 = 1`;
+
+    params = [
+      "accepted",
+      "inprogress",
+      "completed",
+      "removed",
+      "completed",
+      user_id,
+    ];
+
+    if (categories.length) {
+      const placeholders = categories.map(() => "?").join(", ");
+
+      query += ` AND fsc.service_id IN (${placeholders})`;
+      params.push(...categories);
+    }
+    if (experience.length) {
+      const placeholders = experience.map(() => "?").join(", ");
+
+      query += ` AND fpo.experience_id IN (${placeholders})`;
+      params.push(...experience);
+    }
+    if (rating.length) {
+      const placeholders = rating.map(() => "?").join(", ");
+
+      query += ` AND FLOOR(fp.avg_ratings) IN (${placeholders})`;
+      params.push(...rating);
+    }
+    if (keyword) {
+      query += ` AND (fp.id IN (
+      SELECT fs2.freelancer_profile_id
+      FROM freelancer_skills fs2
+      JOIN skills s2 ON s2.id = fs2.skill_id
+      WHERE s2.value LIKE ?
+    )
+      OR dm.value LIKE ?
+    )`;
+      const searchKeyword = `%${keyword}%`;
+      params.push(searchKeyword, searchKeyword);
+    }
+    if (location) {
+      query += ` AND (fp.address LIKE ?
+      OR fp.city LIKE ?
+      OR fp.state LIKE ?
+      OR fp.country LIKE ?)`;
+      const searchKeyword = `%${location}%`;
+      params.push(searchKeyword, searchKeyword, searchKeyword, searchKeyword);
+    }
+
+    query += ` GROUP BY fp.id`;
+
+    const result = await executeQuery(query, params);
+
+    if (result?.success === 1) {
+      return {
+        success: 1,
+        data: result?.data,
+      };
+    } else if (result?.success === 0) {
+      return {
+        success: 0,
+        error: result?.error,
+      };
+    }
+  }
+
+  // RATE FREELANCER RATINGS
+  async addRateFreelancer(
+    { client_id, freelancer_id, project_id, rating, review },
+    connection = null,
+  ) {
+    let query;
+    let params;
+
+    query = `INSERT INTO freelancer_ratings (client_id, freelancer_id, project_id, rating, review) VALUES (?, ?, ?, ?, ?)`;
+    params = [client_id, freelancer_id, project_id, rating, review];
+
+    const result = await executeQuery(query, params, connection);
+
+    if (result?.success === 1) {
+      return {
+        success: 1,
+        data: result?.data,
+      };
+    } else if (result?.success === 0) {
+      return {
+        success: 0,
+        error: result?.error,
+      };
+    }
+  }
+  async fetchAverageRatings({ freelancer_id }, connection = null) {
+    let query;
+    let params;
+
+    query = `SELECT 
+            ROUND(AVG(rating), 1) AS average_ratings, 
+            COUNT(*) AS total_ratings
+            FROM freelancer_ratings 
+            WHERE freelancer_id = ?`;
+    params = [freelancer_id];
+
+    const result = await executeQuery(query, params, connection);
+
+    if (result?.success === 1) {
+      return {
+        success: 1,
+        data: result?.data,
+      };
+    } else if (result?.success === 0) {
+      return {
+        success: 0,
+        error: result?.error,
+      };
+    }
+  }
+  async updateAverageRatings(
+    { freelancer_id, average_ratings, total_ratings },
+    connection = null,
+  ) {
+    let query;
+    let params;
+
+    query = `UPDATE freelancer_profile SET avg_ratings = ?, total_ratings = ? WHERE id = ?`;
+    params = [average_ratings, total_ratings, freelancer_id];
+    const result = await executeQuery(query, params, connection);
+
+    if (result?.success === 1) {
+      return {
+        success: 1,
+        data: result?.data,
+      };
+    } else if (result?.success === 0) {
+      return {
+        success: 0,
+        error: result?.error,
+      };
+    }
+  }
+
+  // INVITE TO PROJECTS
+  async inviteToProjects({ project_id, freelancer_id }) {
+    let query;
+    let params;
+
+    query = `INSERT INTO project_connections (freelancer_id, project_id, initiated_by, status) VALUES (?, ?, ?, ?)`;
+    params = [freelancer_id, project_id, "CLIENT", "pending"];
 
     const result = await executeQuery(query, params);
 
@@ -659,6 +825,27 @@ WHERE user_id = ?
 
     query = `SELECT id, name, profile_pic FROM client_profile WHERE id = ?`;
     params = [client_id];
+
+    const result = await executeQuery(query, params);
+
+    if (result?.success === 1) {
+      return {
+        success: 1,
+        data: result?.data,
+      };
+    } else if (result?.success === 0) {
+      return {
+        success: 0,
+        error: result?.error,
+      };
+    }
+  }
+  async getMyProjects({ user_id }) {
+    let query;
+    let params;
+
+    query = `SELECT id FROM projects WHERE user_id = ?`;
+    params = [user_id];
 
     const result = await executeQuery(query, params);
 

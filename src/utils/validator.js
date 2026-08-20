@@ -22,20 +22,6 @@ export const validateRequest = (schema, data, res) => {
   }
   return value;
 };
-const monthNames = [
-  "January",
-  "February",
-  "March",
-  "April",
-  "May",
-  "June",
-  "July",
-  "August",
-  "September",
-  "October",
-  "November",
-  "December",
-];
 
 // AUTHENTICATION
 export const requestOtpSchema = Joi.object({
@@ -324,11 +310,11 @@ export const createFreelancerEducationSchema = Joi.object({
   course: Joi.string().required(),
   start_month: Joi.string()
     .required()
-    .valid(...monthNames),
+    .valid(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12),
   start_year: Joi.number().required(),
   end_month: Joi.string()
     .required()
-    .valid(...monthNames),
+    .valid(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12),
   end_year: Joi.number().required(),
 });
 export const updateFreelancerEducationSchema = Joi.object({
@@ -336,11 +322,11 @@ export const updateFreelancerEducationSchema = Joi.object({
   course: Joi.string().required(),
   start_month: Joi.number()
     .required()
-    .valid(...monthNames),
+    .valid(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12),
   start_year: Joi.number().required(),
   end_month: Joi.number()
     .required()
-    .valid(...monthNames),
+    .valid(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12),
   end_year: Joi.number().required(),
 });
 export const deleteFreelancerEducationSchema = Joi.object({
@@ -350,17 +336,25 @@ export const deleteFreelancerEducationSchema = Joi.object({
 // FREELANCER PROFILE WORK EXPERIENCE
 export const createFreelancerWorkexpSchema = Joi.object({
   job_role: Joi.string().required(),
-  start_month: Joi.number().required(),
+  start_month: Joi.number()
+    .valid(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12)
+    .required(),
   start_year: Joi.number().required(),
-  end_month: Joi.number().required(),
+  end_month: Joi.number()
+    .valid(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12)
+    .required(),
   end_year: Joi.number().required(),
 });
 export const updateFreelancerWorkexpSchema = Joi.object({
   id: Joi.number().required(),
   job_role: Joi.string().required(),
-  start_month: Joi.number().required(),
+  start_month: Joi.number()
+    .valid(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12)
+    .required(),
   start_year: Joi.number().required(),
-  end_month: Joi.number().required(),
+  end_month: Joi.number()
+    .valid(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12)
+    .required(),
   end_year: Joi.number().required(),
 });
 export const deleteFreelancerWorkexpSchema = Joi.object({
@@ -427,7 +421,27 @@ export const addRecentlyVisitedFreelancerSchema = Joi.object({
 export const searchFreelancerSchema = Joi.object({
   categories: Joi.array().items(Joi.number().integer()).unique().required(),
   experience: Joi.array().items(Joi.number().integer()).unique().required(),
-  rating: Joi.array().items(Joi.number().integer()).unique().required(),
+  rating: Joi.array()
+    .items(Joi.number().integer().valid(1, 2, 3, 4, 5))
+    .unique()
+    .required(),
   keyword: Joi.string().required().allow(""),
   location: Joi.string().required().allow(""),
+});
+
+// RATE FREELANCER
+export const rateFreelancerSchema = Joi.object({
+  freelancer_id: Joi.number().integer().required(),
+  project_id: Joi.number().integer().required(),
+  rating: Joi.number().integer().required().valid(1, 2, 3, 4, 5),
+  review: Joi.string().required().allow(""),
+});
+
+// INVITE TO PROJECT
+export const inviteToProjectSchema = Joi.object({
+  freelancer_id: Joi.number().integer().required(),
+  project_id: Joi.array().items(Joi.number().integer()).min(1).required(),
+});
+export const getViewFreelancerProfileSchema = Joi.object({
+  freelancer_id: Joi.number().integer().required(),
 });

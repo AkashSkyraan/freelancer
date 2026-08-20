@@ -413,7 +413,21 @@ export class freelancerModel {
     let query;
     let params;
 
-    query = `SELECT id, language_id, proficiency_id FROM freelancer_languages WHERE freelancer_profile_id = ?`;
+    query = `SELECT 
+    fl.id,
+    
+    dm_lang.value AS language, dm_prof.value AS proficiency
+     
+    FROM freelancer_languages fl
+     
+    LEFT JOIN dropdown_master dm_lang ON dm_lang.id = fl.language_id
+     AND dm_lang.category = "languages"
+     
+     LEFT JOIN dropdown_master dm_prof ON dm_prof.id = fl.proficiency_id
+     AND dm_prof.category = "proficiency"
+     
+     WHERE fl.freelancer_profile_id = ?`;
+
     params = [freelancer_id];
 
     const result = await executeQuery(query, params);
@@ -455,7 +469,16 @@ export class freelancerModel {
     let query;
     let params;
 
-    query = `SELECT id, position_id, experience_id FROM freelancer_positions WHERE freelancer_profile_id = ?`;
+    query = `SELECT 
+    fpo.id, dm_pos.value
+
+     FROM freelancer_positions fpo
+
+    LEFT JOIN dropdown_master dm_pos ON dm_pos.id = fpo.position_id
+    AND dm_pos.category = "positions"
+
+    WHERE fpo.freelancer_profile_id = ?`;
+
     params = [freelancer_id];
 
     const result = await executeQuery(query, params);
@@ -476,7 +499,13 @@ export class freelancerModel {
     let query;
     let params;
 
-    query = `SELECT id, service_id FROM freelancer_service_categories WHERE freelancer_profile_id = ?`;
+    query = `SELECT fsc.id, c.name
+
+    FROM freelancer_service_categories fsc
+
+     LEFT JOIN categories c ON c.id = fsc.service_id
+
+    WHERE fsc.freelancer_profile_id = ?`;
     params = [freelancer_id];
 
     const result = await executeQuery(query, params);
@@ -497,7 +526,14 @@ export class freelancerModel {
     let query;
     let params;
 
-    query = `SELECT id, skill_id FROM freelancer_skills WHERE freelancer_profile_id = ?`;
+    query = `SELECT fs.id, s.value
+
+    FROM freelancer_skills fs
+
+     LEFT JOIN skills s ON s.id = fs.skill_id
+
+    WHERE fs.freelancer_profile_id = ?`;
+
     params = [freelancer_id];
 
     const result = await executeQuery(query, params);
@@ -1047,6 +1083,109 @@ WHERE user_id = ?
 
     query = `INSERT INTO project_connections (freelancer_id, project_id, initiated_by, status) VALUES (?, ?, ?, ?)`;
     params = [freelancer_id, project_id, initiated_by, status];
+
+    const result = await executeQuery(query, params);
+
+    if (result?.success === 1) {
+      return {
+        success: 1,
+        data: result?.data,
+      };
+    } else if (result?.success === 0) {
+      return {
+        success: 0,
+        error: result?.error,
+      };
+    }
+  }
+
+  // RATINGS AND FEEDBACKS
+  async getMyFeedbacks({ freelancer_id }) {
+    let query;
+    let params;
+
+    query = `SELECT fr.review, cp.name, cp.company_name
+    FROM freelancer_ratings fr
+    LEFT JOIN client_profile cp ON cp.id = fr.client_id
+    WHERE fr.freelancer_id = ?`;
+    params = [freelancer_id];
+
+    const result = await executeQuery(query, params);
+
+    if (result?.success === 1) {
+      return {
+        success: 1,
+        data: result?.data,
+      };
+    } else if (result?.success === 0) {
+      return {
+        success: 0,
+        error: result?.error,
+      };
+    }
+  }
+  async getMyRatings({ freelancer_id }) {
+    let query;
+    let params;
+
+    query = `SELECT fr.rating, COUNT(fr.id) AS count,
+    fp.avg_ratings, fp.total_ratings
+
+    FROM freelancer_ratings fr
+
+    LEFT JOIN freelancer_profile fp ON fp.id = fr.freelancer_id
+
+    WHERE fr.freelancer_id = ?
+    GROUP BY fr.rating ORDER BY fr.rating`;
+    params = [freelancer_id];
+
+    const result = await executeQuery(query, params);
+
+    if (result?.success === 1) {
+      return {
+        success: 1,
+        data: result?.data,
+      };
+    } else if (result?.success === 0) {
+      return {
+        success: 0,
+        error: result?.error,
+      };
+    }
+  }
+
+  // COMPLETED PROJECTS
+  async getCompletedProjects({ freelancer_id }) {
+    let query;
+    let params;
+
+    query = `SELECT 
+    p.id, p.title, p.descp, p.duration, p.duration_type, p.price, p.price_type,
+    p.open_position, p.project_status, p.views_count, p.city, p.state,
+
+    dm_exp.value AS experience,
+    dm_ptype.value AS price_type,
+    dm_pos.value AS talent_role,
+    GROUP_CONCAT(DISTINCT s.value ORDER BY s.value SEPARATOR ', ') AS skills
+
+    FROM project_connections pc
+
+    LEFT JOIN projects p on P.id = pc.project_id
+
+    LEFT JOIN dropdown_master dm_exp ON dm_exp.id = p.experience
+    AND dm_exp.category = "experience"
+
+    LEFT JOIN dropdown_master dm_ptype ON dm_ptype.id = p.price_type
+    AND dm_ptype.category = "price_type"
+
+    LEFT JOIN dropdown_master dm_pos ON dm_pos.id = p.talent_role
+    AND dm_pos.category = "positions"
+
+    LEFT JOIN skills s ON FIND_IN_SET(s.id, p.skills) > 0
+
+    WHERE pc.freelancer_id = ? AND pc.status = ?`;
+
+    params = [freelancer_id, "completed"];
 
     const result = await executeQuery(query, params);
 

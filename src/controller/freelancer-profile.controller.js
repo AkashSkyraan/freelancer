@@ -711,20 +711,6 @@ export const createFreelancerWorkexp = async (req, res) => {
     const { job_role, start_month, start_year, end_month, end_year } =
       validatedData;
 
-    // const is_user_exist = await authMdl.is_user_exist({ user_id });
-    // if (is_user_exist?.success === 0) {
-    //   return sendResponse(
-    //     res,
-    //     200,
-    //     0,
-    //     "failed to create freelancer work experience",
-    //     [],
-    //     "",
-    //   );
-    // } else if (is_user_exist?.data.length === 0) {
-    //   return sendResponse(res, 200, 0, "No freelancer found", [], "");
-    // }
-
     const freelancer_id_result = await freelancerMdl.fetchFreelancerId({
       user_id,
     });
@@ -944,20 +930,6 @@ export const getFreelancerProfile = async (req, res) => {
   try {
     const user_id = req.user.user_id;
 
-    // const is_user_exist = await authMdl.is_user_exist({ user_id });
-    // if (is_user_exist?.success === 0) {
-    //   return sendResponse(
-    //     res,
-    //     200,
-    //     0,
-    //     "failed to fetch freelancer profile",
-    //     [],
-    //     "",
-    //   );
-    // } else if (is_user_exist?.data.length === 0) {
-    //   return sendResponse(res, 200, 0, "No freelancer found", [], "");
-    // }
-
     const freelancer_id_result = await freelancerMdl.fetchFreelancerId({
       user_id,
     });
@@ -1001,13 +973,13 @@ export const getFreelancerProfile = async (req, res) => {
       freelancerMdl.getWork_exps({ freelancer_id }),
     ]);
 
-    const profile_data = await profile?.data;
-    const languages_data = await languages?.data;
-    const educations_data = await educations?.data;
-    const positions_data = await positions?.data;
-    const services_data = await services?.data;
-    const skills_data = await skills?.data;
-    const work_exps_data = await work_exps?.data;
+    const profile_data = profile?.data;
+    const languages_data = languages?.data;
+    const educations_data = educations?.data;
+    const positions_data = positions?.data;
+    const services_data = services?.data;
+    const skills_data = skills?.data;
+    const work_exps_data = work_exps?.data;
 
     const data = {
       profile: profile_data,

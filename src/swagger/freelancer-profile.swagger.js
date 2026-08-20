@@ -191,13 +191,13 @@
  *                 example: "Computer science"
  *               start_month:
  *                 type: number
- *                 example: January
+ *                 example: 1
  *               start_year:
  *                 type: number
  *                 example: 2020
  *               end_month:
  *                 type: number
- *                 example: July
+ *                 example: 6
  *               end_year:
  *                 type: number
  *                 example: 2024
@@ -235,13 +235,13 @@
  *                 example: "Computer science"
  *               start_month:
  *                 type: number
- *                 example: March
+ *                 example: 3
  *               start_year:
  *                 type: number
  *                 example: 2020
  *               end_month:
  *                 type: number
- *                 example: May
+ *                 example: 5
  *               end_year:
  *                 type: number
  *                 example: 2024

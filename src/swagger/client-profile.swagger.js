@@ -413,7 +413,7 @@
  */
 // #endregion
 
-// #region Search Project
+// #region Search Freelancer
 /**
  * @swagger
  * /api/client/searchfreelancer:
@@ -451,6 +451,125 @@
  *               location:
  *                 type: string
  *                 example: coimbatore
+ *     responses:
+ *       200:
+ *         $ref: '#/components/responses/SuccessResponse'
+ *
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
+// #endregion
+
+// #region Add rate freelancer
+/**
+ * @swagger
+ * /api/client/addratefreelancer:
+ *   post:
+ *     tags:
+ *       - Client Profile
+ *     summary: Add rate freelancer
+ *     description: Add rate Freelancer rating and feedback.
+ *
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               freelancer_id:
+ *                 type: number
+ *                 example: 2
+ *               project_id:
+ *                 type: number
+ *                 example: 2
+ *               rating:
+ *                 type: number
+ *                 example: 5
+ *               review:
+ *                 type: string
+ *                 example: He did all good
+ *     responses:
+ *       200:
+ *         $ref: '#/components/responses/SuccessResponse'
+ *
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
+// #endregion
+
+// #region Get my projects
+/**
+ * @swagger
+ * /api/client/getmyprojects:
+ *   post:
+ *     tags:
+ *       - Client Profile
+ *     summary: Get my proejcts
+ *     description: Get my projects.
+ *     responses:
+ *       200:
+ *         $ref: '#/components/responses/SuccessResponse'
+ *
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
+// #endregion
+
+// #region Invite to project
+/**
+ * @swagger
+ * /api/client/invitetoproject:
+ *   post:
+ *     tags:
+ *       - Client Profile
+ *     summary: Invite to project
+ *     description: Invite to project.
+ *
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               project_id:
+ *                 type: array
+ *                 items:
+ *                  type: integer
+ *                 example: [1,2,3,4]
+ *               freelancer_id:
+ *                 type: number
+ *                 example: 2
+ *     responses:
+ *       200:
+ *         $ref: '#/components/responses/SuccessResponse'
+ *
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
+// #endregion
+
+// #region Get View freelancer profile
+/**
+ * @swagger
+ * /api/client/viewfreelancerprofile:
+ *   post:
+ *     tags:
+ *       - Client Profile
+ *     summary: Get and view freelancer profile
+ *     description: Get and view freelancer profile.
+ *
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               freelancer_id:
+ *                 type: number
+ *                 example: 2
  *     responses:
  *       200:
  *         $ref: '#/components/responses/SuccessResponse'

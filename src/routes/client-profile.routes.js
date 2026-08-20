@@ -73,4 +73,32 @@ router.post(
   verifyRole(["CLIENT"]),
   clientcontroller.searchFreelancer,
 );
+
+// RATE FREELANCER
+router.post(
+  "/addratefreelancer",
+  verifyRole(["CLIENT"]),
+  clientcontroller.addRateFreelancer,
+);
+
+// GET MY PROJECTS
+router.post(
+  "/getmyprojects",
+  verifyRole(["CLIENT"]),
+  clientcontroller.getMyProjects,
+);
+
+// INVITE TO PROJECT
+router.post(
+  "/invitetoproject",
+  verifyRole(["CLIENT"]),
+  clientcontroller.inviteToProjects,
+);
+
+// VIEW FREELANCER PROFILE
+router.post(
+  "/viewfreelancerprofile",
+  verifyRole(["CLIENT"]),
+  clientcontroller.getViewFreelancerProfile,
+);
 export default router;
