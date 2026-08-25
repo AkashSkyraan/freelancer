@@ -445,3 +445,62 @@ export const inviteToProjectSchema = Joi.object({
 export const getViewFreelancerProfileSchema = Joi.object({
   freelancer_id: Joi.number().integer().required(),
 });
+
+// CLIENT DASHBOARD SCHEMAS
+export const getProjectsSchema = Joi.object({
+  status: Joi.string()
+    .required()
+    .allow("")
+    .valid(
+      "opened",
+      "inprogress",
+      "completed",
+      "closed",
+      "expired",
+      "pending",
+      "accepted",
+      "interested",
+    )
+    .messages({
+      "any.only": "status keyword is incorrect",
+      "any.required": "status is required",
+    }),
+});
+export const getProjectsDetailsSchema = Joi.object({
+  status: Joi.string()
+    .required()
+    .allow("")
+    .valid("pending", "rejected", "accepted")
+    .messages({
+      "any.only": "status keyword is incorrect",
+      "any.required": "status is required",
+    }),
+  project_id: Joi.number().integer().required(),
+  init_by: Joi.string().valid("FREELANCER", "CLIENT").allow("").required(),
+  is_pinned: Joi.number().valid(1).allow(null).required(),
+});
+export const changeProjectstatusSchema = Joi.object({
+  status: Joi.string()
+    .required()
+    .allow("")
+    .valid("inprogress", "completed", "closed")
+    .messages({
+      "any.only": "status keyword is incorrect",
+      "any.required": "status is required",
+    }),
+  project_id: Joi.number().integer().required(),
+  reason: Joi.string().required().allow(""),
+});
+export const projectRepostSchema = Joi.object({
+  project_id: Joi.number().integer().required(),
+});
+export const changeProjectConnectionSchema = Joi.object({
+  id: Joi.number().integer().required(),
+  reason: Joi.string().required().allow(""),
+  type: Joi.number().integer().required().valid(0, 1, 2),
+});
+export const reportFreelancerSchema = Joi.object({
+  freelancer_id: Joi.number().integer().required(),
+  reason_id: Joi.number().integer().required().allow(null),
+  reason: Joi.string().required().allow(""),
+});

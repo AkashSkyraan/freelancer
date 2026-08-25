@@ -6,9 +6,11 @@ import {
   sendResponse,
 } from "../utils/helper.js";
 import {
+  changeProjectstatusSchema,
   createProjectSchema,
   deleteProjectSchema,
   getIndividualProjectSchema,
+  projectRepostSchema,
   updateProjectSchema,
   updateProjectViewCountSchema,
   validateRequest,
@@ -228,5 +230,53 @@ export const updateViewCount = async (req, res) => {
     if (connection) {
       connection.release();
     }
+  }
+};
+
+export const changeProjectStatus = async (req, res) => {
+  try {
+    const validatedData = validateRequest(
+      changeProjectstatusSchema,
+      req.body,
+      res,
+    );
+
+    const { project_id, status, reason } = validatedData;
+
+    const result = await projectMdl.changeProjectStatus({
+      project_id,
+      change_status: status,
+      reason: reason === "" ? null : reason,
+    });
+
+    if (result?.success === 0) {
+      return sendResponse(res, 200, 0, "Failed to change status", [], "");
+    }
+
+    if (result?.success === 1) {
+      return sendResponse(res, 200, 1, "status changed successfully", [], "");
+    }
+  } catch (error) {
+    return getServerError(res, error);
+  }
+};
+
+export const ProjectRepost = async (req, res) => {
+  try {
+    const validatedData = validateRequest(projectRepostSchema, req.body, res);
+
+    const { project_id } = validatedData;
+
+    const result = await projectMdl.projectRepost({ project_id });
+
+    if (result?.success === 0) {
+      return sendResponse(res, 200, 0, "Failed to repost project", [], "");
+    }
+
+    if (result?.success === 1) {
+      return sendResponse(res, 200, 1, "Project reposted successfully", [], "");
+    }
+  } catch (error) {
+    return getServerError(res, error);
   }
 };

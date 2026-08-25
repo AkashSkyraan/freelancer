@@ -13,6 +13,7 @@ import {
   getViewFreelancerProfileSchema,
   inviteToProjectSchema,
   rateFreelancerSchema,
+  reportFreelancerSchema,
   searchFreelancerSchema,
   updateCProfileSchema,
   updateCredentialSchema,
@@ -1180,6 +1181,43 @@ export const getViewFreelancerProfile = async (req, res) => {
         1,
         "Freelancer profile fetched successfully",
         [final_response],
+        "",
+      );
+    }
+  } catch (error) {
+    return getServerError(res, error);
+  }
+};
+
+// REPORT FREELANCER PROFILE
+export const reportFreelancerProfile = async (req, res) => {
+  try {
+    const validatedData = validateRequest(
+      reportFreelancerSchema,
+      req.body,
+      res,
+    );
+    const user_id = req.user.user_id;
+    const { freelancer_id, reason_id, reason } = validatedData;
+
+    const result = await clientMdl.addReportFreelancer({
+      user_id,
+      freelancer_id,
+      reason_id,
+      reason: reason?.trim() || null,
+    });
+
+    if (result?.success === 0) {
+      return sendResponse(res, 200, 0, "Failed to report freelancer", [], "");
+    }
+
+    if (result?.success === 1) {
+      return sendResponse(
+        res,
+        200,
+        1,
+        "Reported freelancer successfully",
+        [],
         "",
       );
     }

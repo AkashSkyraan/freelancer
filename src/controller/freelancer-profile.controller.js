@@ -1832,6 +1832,7 @@ export const addReportClientProfile = async (req, res) => {
 
 // SEND INTEREST
 export const sendProjectInterest = async (req, res) => {
+  let connection;
   try {
     const validatedData = validateRequest(sendInterestSchema, req.body, res);
     const { project_id } = validatedData;
@@ -1865,19 +1866,57 @@ export const sendProjectInterest = async (req, res) => {
     const initiated_by = "FREELANCER";
     const status = "pending";
 
-    const result = await freelancerMdl.sendProjectInterest({
-      freelancer_id,
-      project_id,
-      initiated_by,
-      status,
-    });
+    connection = await pool.getConnection();
+    await connection.beginTransaction();
 
-    if (result?.success === 0) {
+    const result = await freelancerMdl.sendProjectInterest(
+      {
+        freelancer_id,
+        project_id,
+        initiated_by,
+        status,
+      },
+      connection,
+    );
+    const change_status = "interested";
+
+    const change_project_status_result = await projectMdl.changeProjectStatus(
+      {
+        project_id,
+        change_status,
+      },
+      connection,
+    );
+
+    if (result?.success === 0 || change_project_status_result?.success === 0) {
+      if (connection) {
+        await connection.rollback();
+      }
       return sendResponse(res, 200, 0, "Failed to send interest", [], "");
-    } else if (result?.success === 1) {
-      return sendResponse(res, 200, 1, "Project sent successfully", [], "");
+    } else if (
+      result?.success === 1 &&
+      change_project_status_result?.success === 1
+    ) {
+      if (connection) {
+        await connection.commit();
+      }
+      return sendResponse(
+        res,
+        200,
+        1,
+        "Project interest sent successfully",
+        [],
+        "",
+      );
     }
   } catch (error) {
+    if (connection) {
+      await connection.rollback();
+    }
     return getServerError(res, error);
+  } finally {
+    if (connection) {
+      connection.release();
+    }
   }
 };

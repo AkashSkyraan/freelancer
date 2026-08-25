@@ -85,8 +85,8 @@ export class projectModel {
     let query;
     let params;
 
-    query = `DELETE FROM projects WHERE id = ? and user_id = ?`;
-    params = [id, user_id];
+    query = `UPDATE projects SET is_deleted = ? WHERE id = ? AND user_id = ?`;
+    params = [1, id, user_id];
 
     const result = await executeQuery(query, params);
 
@@ -197,10 +197,14 @@ export class projectModel {
     const placeholders = project_ids.map(() => "?").join(", ");
 
     query = `SELECT
-  p.id, p.title, p.descp, p.skills, p.talent_role, p.duration, p.duration_type,
-  p.experience, p.price, p.price_type, p.open_position, p.project_status,
-  p.views_count, p.address, p.city, p.state, p.country, p.zip_code,
-  p.lat, p.lng, p.created_at,
+  p.id, p.title, p.descp, dm_pos.value AS talent_role,
+  p.duration, p.duration_type,
+  dm_exp.value AS experience, p.price, dm_ptype.value AS price_type,
+  p.open_position, p.project_status,
+  p.views_count, p.address, p.city, p.state,
+  p.country, p.zip_code, p.lat, p.lng, p.created_at,
+
+  GROUP_CONCAT(DISTINCT s.value) AS skills,
 
   CASE
   WHEN p.id IN (sp.project_id)
@@ -210,13 +214,88 @@ export class projectModel {
 
   FROM projects p
 
+  LEFT JOIN dropdown_master dm_pos ON dm_pos.id = p.talent_role
+  AND dm_pos.category = "positions"
+
+  LEFT JOIN dropdown_master dm_exp ON dm_exp.id = p.experience
+  AND dm_exp.category = "experience"
+
+  LEFT JOIN dropdown_master dm_ptype ON dm_ptype.id = p.price_type
+  AND dm_ptype.category = "price_type"
+
+  LEFT JOIN skills s ON FIND_IN_SET (s.id, p.skills) > 0
+
   LEFT JOIN saved_projects sp ON sp.project_id = p.id
 
-  WHERE p.id IN (${placeholders}) ORDER BY FIELD(p.id, ${placeholders})`;
+  WHERE p.id IN (${placeholders}) GROUP BY p.id ORDER BY FIELD(p.id, ${placeholders})`;
     params = [...project_ids, ...project_ids];
 
     const result = await executeQuery(query, params);
 
+    if (result?.success === 1) {
+      return {
+        success: 1,
+        data: result?.data,
+      };
+    } else if (result?.success === 0) {
+      return {
+        success: 0,
+        error: result?.error,
+      };
+    }
+  }
+  async changeProjectStatus(
+    { project_id, change_status, reason = null },
+    connection = null,
+  ) {
+    let query;
+    let params = [];
+
+    query = `UPDATE projects SET project_status = ?`;
+    params.push(change_status);
+
+    if (reason != undefined) {
+      query += ` , closed_reason = ?`;
+      params.push(reason);
+    }
+    query += ` where id = ?`;
+    params.push(project_id);
+
+    if (change_status === "inprogress") {
+      query += ` AND project_status = "accepted"`;
+    }
+    if (change_status === "completed") {
+      query += ` AND project_status = "inprogress"`;
+    }
+    if (change_status === "interested") {
+      query += ` AND project_status = "opened"`;
+    }
+    if (change_status === "accepted") {
+      query += ` AND project_status = "interested"`;
+    }
+
+    const result = await executeQuery(query, params, connection);
+
+    if (result?.success === 1) {
+      return {
+        success: 1,
+        data: result?.data,
+      };
+    } else if (result?.success === 0) {
+      return {
+        success: 0,
+        error: result?.error,
+      };
+    }
+  }
+  async projectRepost({ project_id }) {
+    let query;
+    let params;
+
+    query = `UPDATE projects SET project_status = ?, is_reposted = ?, expired_at = NOW() WHERE id = ? AND project_status IN ('expired', 'closed')`;
+    params = ["opened", 1, project_id];
+
+    const result = await executeQuery(query, params);
     if (result?.success === 1) {
       return {
         success: 1,

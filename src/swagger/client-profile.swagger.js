@@ -579,4 +579,39 @@
  */
 // #endregion
 
+// #region Get View freelancer profile
+/**
+ * @swagger
+ * /api/client/reportfreelancer:
+ *   post:
+ *     tags:
+ *       - Client Profile
+ *     summary: Report freelancer
+ *     description: Report freelancer.
+ *
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               freelancer_id:
+ *                 type: number
+ *                 example: 2
+ *               reason_id:
+ *                 type: number
+ *                 example: 2
+ *               reason:
+ *                 type: string
+ *                 example: not available
+ *     responses:
+ *       200:
+ *         $ref: '#/components/responses/SuccessResponse'
+ *
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
+// #endregion
+
 export {};

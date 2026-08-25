@@ -1072,19 +1072,17 @@ WHERE user_id = ?
   }
 
   // SEND INTEREST
-  async sendProjectInterest({
-    freelancer_id,
-    project_id,
-    initiated_by,
-    status,
-  }) {
+  async sendProjectInterest(
+    { freelancer_id, project_id, initiated_by, status },
+    connection = null,
+  ) {
     let query;
     let params;
 
     query = `INSERT INTO project_connections (freelancer_id, project_id, initiated_by, status) VALUES (?, ?, ?, ?)`;
     params = [freelancer_id, project_id, initiated_by, status];
 
-    const result = await executeQuery(query, params);
+    const result = await executeQuery(query, params, connection);
 
     if (result?.success === 1) {
       return {

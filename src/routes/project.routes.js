@@ -28,4 +28,15 @@ router.post(
   projectcontroller.updateViewCount,
 );
 
+router.post(
+  "/changestatus",
+  verifyRole(["CLIENT"]),
+  projectcontroller.changeProjectStatus,
+);
+
+router.post(
+  "/projectrepost",
+  verifyRole(["CLIENT"]),
+  projectcontroller.ProjectRepost,
+);
 export default router;

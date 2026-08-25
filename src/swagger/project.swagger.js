@@ -171,7 +171,7 @@
  */
 // #endregion
 
-// #region Update project
+// #region Update project view count
 /**
  * @swagger
  * /api/project/updateviewcount:
@@ -189,6 +189,70 @@
  *             type: object
  *             properties:
  *               id:
+ *                 type: number
+ *                 example: 1
+ *     responses:
+ *       200:
+ *         $ref: '#/components/responses/SuccessResponse'
+ *
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
+// #endregion
+
+// #region Update project status
+/**
+ * @swagger
+ * /api/project/changestatus:
+ *   post:
+ *     tags:
+ *       - Project
+ *     summary: Change project status
+ *     description: Change project status.
+ *
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               project_id:
+ *                 type: number
+ *                 example: 1
+ *               status:
+ *                 type: string
+ *                 example: completed
+ *               reason:
+ *                 type: string
+ *                 example: found a good freelancer outside
+ *     responses:
+ *       200:
+ *         $ref: '#/components/responses/SuccessResponse'
+ *
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
+// #endregion
+
+// #region Update project status
+/**
+ * @swagger
+ * /api/project/projectrepost:
+ *   post:
+ *     tags:
+ *       - Project
+ *     summary: Project repost
+ *     description: Project repost.
+ *
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               project_id:
  *                 type: number
  *                 example: 1
  *     responses:

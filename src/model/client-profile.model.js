@@ -776,6 +776,29 @@ WHERE user_id = ?
     }
   }
 
+  // REPORT FREELACNER
+  async addReportFreelancer({ user_id, freelancer_id, reason_id, reason }) {
+    let query;
+    let params;
+
+    query = `INSERT INTO user_reports (reporter_user_id, freelancer_id, reason_id, reason) VALUES (?, ?, ?, ?)`;
+    params = [user_id, freelancer_id, reason_id, reason];
+
+    const result = await executeQuery(query, params);
+
+    if (result?.success === 1) {
+      return {
+        success: 1,
+        data: result?.data,
+      };
+    } else if (result?.success === 0) {
+      return {
+        success: 0,
+        error: result?.error,
+      };
+    }
+  }
+
   // SUPPORT QUERIES
   async fetchClientId({ user_id }) {
     let query;

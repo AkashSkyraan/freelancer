@@ -101,4 +101,11 @@ router.post(
   verifyRole(["CLIENT"]),
   clientcontroller.getViewFreelancerProfile,
 );
+
+// REPORT FREELANCER
+router.post(
+  "/reportfreelancer",
+  verifyRole(["CLIENT"]),
+  clientcontroller.reportFreelancerProfile,
+);
 export default router;
