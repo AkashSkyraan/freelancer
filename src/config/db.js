@@ -13,5 +13,5 @@ export const pool = mysql2.createPool({
   waitForConnections: process.env.DB_WAIT_FOR_CONNECTIONS,
   connectionLimit: process.env.DB_CONNECTION_LIMIT,
   queueLimit: process.env.DB_QUEUE_LIMIT,
-//   dateStrings: true,
+  //   dateStrings: true,
 });
