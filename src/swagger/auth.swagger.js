@@ -181,4 +181,42 @@
  */
 // #endregion
 
+// #region Current User
+/**
+ * @swagger
+ * /api/auth/me:
+ *   post:
+ *     tags:
+ *       - Auth
+ *     summary: Is user logged In
+ *     description: To check whether user logged in
+ *
+ *     responses:
+ *       200:
+ *         $ref: '#/components/responses/SuccessResponse'
+ *
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
+// #endregion
+
+// #region Logout User
+/**
+ * @swagger
+ * /api/auth/logout:
+ *   post:
+ *     tags:
+ *       - Auth
+ *     summary: Logout user
+ *     description: To logout user
+ *
+ *     responses:
+ *       200:
+ *         $ref: '#/components/responses/SuccessResponse'
+ *
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
+// #endregion
+
 export {};

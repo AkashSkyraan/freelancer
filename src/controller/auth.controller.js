@@ -11,6 +11,7 @@ import {
   generateOtp,
   generateUserId,
   getServerError,
+  replaceNullWithEmptyString,
   sendResponse,
 } from "../utils/helper.js";
 import { authModel } from "../model/auth.model.js";
@@ -37,6 +38,8 @@ export const requestOtp = async (req, res) => {
 
     const user_result = await authMdl.fetchUserCount(email, phn_num);
     const user_count = user_result?.data.length;
+
+    // 1 - login, 2 - signup, 0 - no db check
 
     if (type === 0) {
       // do nothing
@@ -108,6 +111,8 @@ export const verifyOtp = async (req, res) => {
     }
 
     await authMdl.verifyOtp(data?.id);
+
+    // 0- notmal otp verify, 1 -  forgot password ku mattum type 1 nu vechu send pannanum so middleware will only allow to change password if it is valid token.
 
     if (result?.success === 1 && type === 0) {
       return sendResponse(res, 200, 1, "otp verified successfully", [], "");
@@ -181,7 +186,16 @@ export const signUp = async (req, res) => {
 
     if (result?.success === 1 && register_role?.success === 1) {
       await connection.commit();
-      return sendResponse(res, 200, 1, "signup successfully done", [token], "");
+
+      res.cookie("accessToken", token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        maxAge: 24 * 60 * 60 * 1000,
+        path: "/",
+      });
+
+      return sendResponse(res, 200, 1, "signup successfully done", [], "");
     } else if (result?.success === 0 || register_role?.success === 0) {
       await connection.rollback();
       return sendResponse(res, 200, 0, "signup failed", [], "");
@@ -229,7 +243,14 @@ export const login = async (req, res) => {
         { email, user_id, user_role },
         process.env.JWT_SECRET_KEY,
       );
-      return sendResponse(res, 200, 1, "login successfull", [token], "");
+      res.cookie("accessToken", token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        maxAge: 24 * 60 * 60 * 1000,
+        path: "/",
+      });
+      return sendResponse(res, 200, 1, "login successfull", [], "");
     } else {
       return sendResponse(res, 200, 0, "Invalid credentials", [], "");
     }
@@ -254,6 +275,57 @@ export const forgotPassword = async (req, res) => {
     } else if (result?.success === 0) {
       return sendResponse(res, 200, 0, "Failed to update password", [], "");
     }
+  } catch (error) {
+    return getServerError(res, error);
+  }
+};
+
+export const getCurrentUser = async (req, res) => {
+  try {
+    const user_id = req.user.user_id;
+
+    const result = await authMdl.getCurrentUser({
+      user_id,
+    });
+
+    if (result?.success === 0) {
+      return sendResponse(
+        res,
+        500,
+        0,
+        "Failed to fetch user details",
+        [],
+        result.error,
+      );
+    }
+
+    if (!result?.data?.length) {
+      return sendResponse(res, 404, 0, "User not found", [], "");
+    }
+    const data = replaceNullWithEmptyString(result.data[0]);
+    return sendResponse(
+      res,
+      200,
+      1,
+      "User details fetched successfully",
+      data,
+      "",
+    );
+  } catch (error) {
+    return getServerError(res, error);
+  }
+};
+
+export const logout = async (req, res) => {
+  try {
+    res.clearCookie("accessToken", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+    });
+
+    return sendResponse(res, 200, 1, "Logout successfully done", [], "");
   } catch (error) {
     return getServerError(res, error);
   }

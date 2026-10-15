@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken";
 
 export const verifyResetToken = async (req, res, next) => {
   try {
-    const authHeader = req.headers.authorization;
+    const authHeader = req.cookies?.accessToken;
 
     if (!authHeader) {
       return sendResponse(
@@ -16,9 +16,9 @@ export const verifyResetToken = async (req, res, next) => {
         "",
       );
     }
-    const [scheme, token] = authHeader.split(" ");
+    const [token] = authHeader.split(" ");
 
-    if (scheme !== "Bearer" || !token) {
+    if (!token) {
       return sendResponse(
         res,
         401,
@@ -29,7 +29,7 @@ export const verifyResetToken = async (req, res, next) => {
       );
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_RESET_TOKEN_KEY);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
     req.user = decoded;
     next();
   } catch (error) {

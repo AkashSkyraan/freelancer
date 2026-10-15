@@ -293,4 +293,31 @@ export class authModel {
       };
     }
   }
+
+  async getCurrentUser({ user_id }) {
+    let query;
+    let params;
+
+    query = `SELECT u.email, ur.user_role, fp.name, fp.profile_pic, cp.name, cp.profile_pic FROM users u 
+    LEFT JOIN user_role ur ON ur.user_id = u.user_id
+    LEFT JOIN freelancer_profile fp ON fp.user_id = u.user_id
+    LEFT JOIN client_profile cp ON cp.user_id = u.user_id
+    WHERE u.user_id = ?
+    LIMIT 1`;
+
+    params = [user_id];
+    const result = await executeQuery(query, params);
+
+    if (result?.success === 1) {
+      return {
+        success: 1,
+        data: result?.data,
+      };
+    } else if (result?.success === 0) {
+      return {
+        success: 0,
+        error: result?.error,
+      };
+    }
+  }
 }

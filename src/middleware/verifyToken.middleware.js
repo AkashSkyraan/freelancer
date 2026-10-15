@@ -6,7 +6,7 @@ import jwt, { decode } from "jsonwebtoken";
 
 export const verifyToken = async (req, res, next) => {
   try {
-    const authHeader = req.headers.authorization;
+    const authHeader = req.cookies?.accessToken;
     if (!authHeader) {
       return sendResponse(
         res,
@@ -17,9 +17,9 @@ export const verifyToken = async (req, res, next) => {
         "",
       );
     }
-    const [scheme, token] = authHeader.split(" ");
+    const [token] = authHeader.split();
 
-    if (scheme !== "Bearer" || !token) {
+    if (!token) {
       return sendResponse(
         res,
         401,
